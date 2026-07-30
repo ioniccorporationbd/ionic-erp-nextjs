@@ -1,0 +1,165 @@
+﻿"use client";
+
+const bannerImg = "/assets/erp/ionicerphealth.png";
+import { FaCheck } from "react-icons/fa";
+
+
+
+const BannerHealthCare = () => {
+    return (
+        <div className="md:pt-36 pt-[120px]">
+
+            <section className="grid xl:grid-cols-6  md:grid-cols-5  grid-cols-1  childBanner" >
+
+
+                {/* ------------banner left--------------- */}
+
+                <div className="xl:col-span-4  md:col-span-3 bg-[#2c2a2a] text-white flex   flex-col  md:rounded-tl-xl md:rounded-tr-none rounded-t-xl  bannerWidth  
+                  ">
+
+
+                                   
+<div className="bannerHeading  md:p-7 p-5    ">
+
+<p className="pb-3 font-bold text-[#C8FF32] text-lg  2xl:mt-[10px]">আইওনিক ইআরপি - <span className="text-white">স্বাস্থ্যসেবা</span></p>
+<h1 className="lg:text-[29.6px] xl:text-[26px] 2xl:text-[28.7px]  text-[26px] md:text-[32.8px] font-semibold pb-3 text-justify  erpheading1 ">টোটাল সলুয়েশন বিজনেস ম্যানেজমেন্ট ইআরপি সফটওয়্যার  </h1>
+<h1 className="xl:text-[18px] 2xl:!text-[18px] text-[15px] md:text-[15px] text-justify  font-semibold   erpheading2">বাংলাদেশে প্রথমবার সবচেয়ে সহজ ও নির্ভূল স্বাস্থ্যসেবা, মাল্টি-স্পেশালিটি হাসপাতাল, ডায়াগনস্টিক সেন্টার এবং অন্যান্য স্বাস্থ্যসেবা ব্যবসা পরিচালনার জন্য বিলিং ও একাউন্টিং সিস্টেম কে পেপারলেস ও অটোমেশন করতে, ১০০০+ এর অধিক ব্যবসা পরিচালনার মডিউল বিদ্যমান আছে <span className="text-[#C8FF32]">“আইওনিক ইআরপি”</span>-র মধ্যে। </h1>
+
+
+
+
+                    </div>
+
+
+                    <div className=" xl:w-[60%]    bannerTExt">
+
+
+
+
+<p className="text-[15px] xl:text-[17.6px] 2xl:text-[18px]  text-justify md:px-7 lg:w-auto px-5 z-10">
+
+
+                            বহু দশক ধরে <span className="text-[#C8FF32]">স্বাস্থ্যসেবা</span>  সর্বদাই একটি দ্রুত গতির সেক্টর হয়েছে যা মানব জীবনের সাথে জড়িত জরুরীতা এবং সমালোচনামূলকতার কারণে। সম্প্রতি আইটি এবং হেলথ কেয়ারের মধ্যে অ্যাসোসিয়েশনের প্রয়োজনীয়তা বিশ্বব্যাপী চিহ্নিত করা হয়েছে এবং অত্যাধুনিক প্রযুক্তির সাহায্যে <span className="text-[#C8FF32]">স্বাস্থ্যসেবা</span>  প্রক্রিয়া/অপারেশনের সামগ্রিক উত্পাদনশীলতা উন্নত করার প্রচেষ্টা করা হয়েছে। প্রযুক্তি প্রদানকারীরা দক্ষতা বা গুণমানের সাথে আপস না করে একটি বিরামহীন ব্যবহারকারীর অভিজ্ঞতা প্রদানের জন্য <span className="text-[#C8FF32]">স্বাস্থ্যসেবা</span> কার্যক্রম স্বয়ংক্রিয় করার জন্য তাদের অনেক প্রচেষ্টা বিনিয়োগ করেছে।
+                        </p>
+
+
+
+
+
+                        <div className="flex justify-center xl:justify-normal">
+
+<button className="pl-5 xl:pb-10 2xl:pt-[35px] xl:pt-[27px] lg:pt-[17px]  md:pt-[5px] " onClick={() => window.dispatchEvent(new Event("open-contact-dialog"))}>  <p className="bg-[#C8FF32] text-black rounded-full p-2 text-[16px] font-extrabold my-10 xl:my-3 px-5">
+    অনুরোধ করুন
+</p>
+</button>
+    </div>
+
+
+
+                    </div>
+                    <div className="relative flex justify-center   ">
+                        <img className="bannerimg 2xl:w-[280px] xl:w-[260px] w-[300px] xl:block   xl:absolute  md:hidden xl:-bottom-[0px] xl:right-0" src={bannerImg} alt="" />
+                    </div>
+                </div>
+
+
+
+
+
+
+
+                {/* ------------banner right--------------- */}
+
+
+
+
+
+                <div className=" xl:col-span-2 md:col-span-2 bg-black text-white x p-7 md:rounded-tr-xl text-center md:text-start bannerRight">
+                    <p className=" font-semibold text-[#C8FF32] pb-3 text-center text-[19px]">আমাদের সেবা সমূহ</p>
+
+                    <p className="text-[15px]  text-justify ">বাংলাদেশে প্রথমবার সবচেয়ে সহজ ও নির্ভূল, ব্যবসা প্রতিষ্ঠান পরিচালনার পূর্নাঙ্গ সমাধান নিয়ে, "আইওনিক কর্পোরেশন" প্রোগ্রামিং ভাষা পাইথন দিয়ে তৈরি, টোটাল সলুয়েশন ইআরপি সফ্টওয়ার উপস্খাপন করলো আপনার জন্য। যে কোন ব্যবসা ও প্রতিষ্ঠান পরিচালনার জন্য প্রতিষ্ঠান ব্যবস্থাপনা ও একাউন্টিং সিস্টেম সহ ১০০+ এর অধিক সমাধানের মডিউল নিয়ে আসলো "আইওনিক কর্পোরেশন"।</p>
+
+                    <h1 className="xl:text-[18px] lg:text-[15px] md:text-[17px] text-xl font-semibold pb-5 pt-8 text-[#C8FF32]  text-center  bannerRightH2">আমাদের বিজনেস সলিউশন সেবা সমূহ</h1>
+
+
+                    <div className="grid grid-cols-2 gap-1 2xl:pl-  pl-5 md:pl-0 2xl:pl-4 2xl:-mr-8">
+
+                        <section className="text-center">
+                            <div className="flex items-center gap-4 pb-5">
+                                <FaCheck className=" rounded-full bg-[#C8FF32] text-black p-1 text-[18px] " />
+                                <p className="text-[12px] md:text-[11px] lg:text-[10px] xl:text-[12px] 2xl:text-[13.8px] ">ইআরপি সফটওয়্যার</p>
+                            </div>
+                            <div className="flex items-center gap-4 pb-5">
+                                <FaCheck className=" rounded-full bg-[#C8FF32] text-black p-1 text-[18px] " />
+                                <p className="text-[12px] md:text-[11px] lg:text-[10px] xl:text-[12px] 2xl:text-[13.8px]">ওয়েব ডেভেলপ</p>
+                            </div>
+                            <div className="flex items-center gap-4 pb-5">
+                                <FaCheck className=" rounded-full bg-[#C8FF32] text-black p-1 text-[18px] " />
+                                <p className="text-[12px] md:text-[11px] lg:text-[10px] xl:text-[12px] 2xl:text-[13.8px]">সফটওয়্যার ডেভেলপ</p>
+                            </div>
+                            <div className="flex items-center gap-4 pb-5">
+                                <FaCheck className=" rounded-full bg-[#C8FF32] text-black p-1 text-[18px] " />
+                                <p className="text-[12px] md:text-[11px] lg:text-[10px] xl:text-[12px] 2xl:text-[13.8px]">মোবাইল অ্যাপস</p>
+                            </div>
+                        </section>
+
+
+                        <section className="text-center">
+                            <div className="flex items-center gap-4 pb-5">
+                                <FaCheck className=" rounded-full bg-[#C8FF32] text-black p-1 text-[18px] " />
+                                <p className="text-[12px] md:text-[11px] lg:text-[10px] xl:text-[12px] 2xl:text-[13.8px]">ক্লাউড স্টোরেজ</p>
+                            </div>
+                            <div className="flex items-center gap-4 pb-5">
+                                <FaCheck className=" rounded-full bg-[#C8FF32] text-black p-1 text-[18px] " />
+                                <p className="text-[12px] md:text-[11px] lg:text-[10px] xl:text-[12px] 2xl:text-[13.8px]">ডোমেন ও হোস্টিং</p>
+                            </div>
+                            <div className="flex items-center gap-4 pb-5">
+                                <FaCheck className=" rounded-full bg-[#C8FF32] text-black p-1 text-[18px] " />
+                                <p className="text-[12px] md:text-[11px] lg:text-[10px] xl:text-[12px] 2xl:text-[13.8px]">এসএমএস সার্ভিস </p>
+                            </div>
+                            <div className="flex items-center gap-4 pb-5">
+                                <FaCheck className=" rounded-full bg-[#C8FF32] text-black p-1 text-[18px] " />
+                                <p className="text-[12px] md:text-[11px] lg:text-[10px] xl:text-[12px] 2xl:text-[13.8px]">ইকমার্স সলিউশন </p>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div>
+                        <p className="text-[20px] font-medium text-[#ffffff] text-center xl:pt-[68px] 2xl:pt-[82px] onurodhrighthealtherp">
+                            আপনার প্রয়োজন কোনটি?
+                        </p>
+                    </div>
+
+
+
+
+
+
+                    {/* ---------------------modal start---------------------------- */}
+
+
+                    {/* Open the modal using document.getElementById('ID').showModal() method */}
+                    <div className="text-center lg:mt-0 xl:mt-0 ">
+                        <button className="" onClick={() => window.dispatchEvent(new Event("open-contact-dialog"))}>  <p className="bg-[#C8FF32] text-black rounded-full p-2 text-[16px]  font-extrabold my-3 px-5 ">
+                            অনুরোধ করুন
+                        </p>
+                        </button>
+                    </div>
+
+
+
+
+
+
+
+                    {/* ---------------------modal end---------------------------- */}
+
+
+
+                </div>
+            </section>
+        </div>
+    );
+};
+
+export default BannerHealthCare;

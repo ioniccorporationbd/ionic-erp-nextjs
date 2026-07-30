@@ -1,0 +1,11 @@
+﻿@import "../legacy.css";
+
+:focus-visible {
+  outline: 2px solid #ffaa00;
+  outline-offset: 2px;
+}
+
+body {
+  margin: 0;
+  background: #f3f3f3;
+}
