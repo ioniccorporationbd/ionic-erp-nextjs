@@ -8,6 +8,7 @@
   loan: "/lone-management-ionic-erp",
   agriculture: "/agriculture-ionic-erp",
   services: "/all-services-ionic-erp",
+  tutorial: "/tutorial",
 } as const;
 
 export type PublicRoute = (typeof routes)[keyof typeof routes];

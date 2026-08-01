@@ -9,3 +9,18 @@ body {
   margin: 0;
   background: #f3f3f3;
 }
+
+.site-shell:has(.tutorial-page) {
+  max-width: none;
+  background: #fff;
+}
+
+.site-shell:has(.tutorial-page) > .marketing-navigation,
+.site-shell:has(.tutorial-page) > .marketing-footer,
+.site-shell:has(.tutorial-page) > .marketing-dialog {
+  display: none;
+}
+
+.site-shell:has(.tutorial-page) > .site-main {
+  padding: 0;
+}

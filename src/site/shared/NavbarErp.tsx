@@ -112,9 +112,9 @@ const NavbarErp = () => {
                 <Link href={routes.services}>
                 <li className='2xl:text-[17px] xl:text-[16px] text-[14px] lg:text-[12px] font-bold'>সেবা সমূহ <span className='opacity-30'>|</span></li>
                 </Link>    
-                <a href='https://ionicerp.xyz/docs'>
+                <Link href={routes.tutorial}>
                 <li className='2xl:text-[17px] xl:text-[16px] text-[14px] lg:text-[12px] font-bold'>টিউটোরিয়াল <span className='opacity-30'>|</span></li>
-                </a>
+                </Link>
 
                 <Link href={routes.contact}>
                 <li className='2xl:text-[17px] xl:text-[16px] text-[14px] lg:text-[12px] font-bold'>যোগাযোগ </li>
@@ -228,9 +228,9 @@ const NavbarErp = () => {
 
 
     
-      <a href='https://ionicerp.xyz/docs'>
+      <Link href={routes.tutorial} onClick={closeDrawer}>
       <li><span className='flex justify-between h-14 font-semibold pr-0 hover:bg-white '> টিউটোরিয়াল </span></li>
-      </a>
+      </Link>
       <hr />
 
 

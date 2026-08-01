@@ -29,12 +29,12 @@ export default function RootLayout({
   return (
     <html lang="bn">
       <body>
-        <div className="mx-auto max-w-[1920px] bg-[#F3F3F3]">
+        <div className="site-shell mx-auto max-w-[1920px] bg-[#F3F3F3]">
           <ScrollToTop />
-          <NavbarErp />
-          <main>{children}</main>
-          <Footer />
-          <ContactDialog />
+          <div className="marketing-navigation"><NavbarErp /></div>
+          <main className="site-main">{children}</main>
+          <div className="marketing-footer"><Footer /></div>
+          <div className="marketing-dialog"><ContactDialog /></div>
         </div>
       </body>
     </html>
