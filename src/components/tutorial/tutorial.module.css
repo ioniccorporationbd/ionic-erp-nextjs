@@ -149,6 +149,8 @@
   color: #000;
   font-size: 15px;
   line-height: 1.7;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .article > p,
 .article > section,
@@ -169,7 +171,7 @@
   width: 100%;
 }
 .article section { scroll-margin-top: 72px; }
-.article h2, .article h3 { color: #171717; font-weight: 650; line-height: 1.3; }
+.article h2, .article h3 { color: #171717; font-weight: 650; line-height: 1.3; overflow-wrap: anywhere; word-break: break-word; }
 .article h2 { font-size: 20px; margin: 28px 0 10px; }
 .article h3 { font-size: 17px; margin: 24px 0 10px; }
 .article h2 a, .article h3 > a {
@@ -184,7 +186,7 @@
 .article ul { list-style: disc; }
 .article ol { list-style: decimal; }
 .article li { margin: 3px 0; padding-left: 2px; }
-.article a { color: #2563eb; text-decoration: underline; text-underline-offset: 2px; }
+.article a { color: #2563eb; overflow-wrap: anywhere; text-decoration: underline; text-underline-offset: 2px; word-break: break-word; }
 .article strong { color: #262626; font-weight: 650; }
 
 .nextPage {
