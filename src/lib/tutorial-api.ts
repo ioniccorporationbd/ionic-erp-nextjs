@@ -71,10 +71,40 @@ async function fetchJson(url: string): Promise<unknown> {
   }
 }
 
+function withFrappeAssetBase(value: string | undefined, frappeBaseUrl: string): string | undefined {
+  if (!value) return value;
+  if (value.startsWith("/assets/ionic_tutorial/")) return `${frappeBaseUrl}${value}`;
+  return value;
+}
+
+function normalizeSpaceAssets(payload: TutorialSpacePayload, frappeBaseUrl: string): TutorialSpacePayload {
+  return {
+    ...payload,
+    space: {
+      ...payload.space,
+      logo: withFrappeAssetBase(payload.space.logo, frappeBaseUrl),
+    },
+  };
+}
+
+function normalizePageAssets(payload: TutorialPagePayload, frappeBaseUrl: string): TutorialPagePayload {
+  return {
+    ...payload,
+    space: {
+      ...payload.space,
+      logo: withFrappeAssetBase(payload.space.logo, frappeBaseUrl),
+    },
+    article: {
+      ...payload.article,
+      cover_image: withFrappeAssetBase(payload.article.cover_image, frappeBaseUrl),
+    },
+  };
+}
+
 export async function getTutorialSpace(): Promise<TutorialSpacePayload> {
   const config = getTutorialConfig();
   if (config.useMocks) return mockTutorialSpace;
-  return parseTutorialSpacePayload(await fetchJson(buildUrl("get_space", { space: config.tutorialSpace })));
+  return normalizeSpaceAssets(parseTutorialSpacePayload(await fetchJson(buildUrl("get_space", { space: config.tutorialSpace }))), config.frappeBaseUrl);
 }
 
 export async function getTutorialPage(slug?: string): Promise<TutorialPagePayload> {
@@ -89,7 +119,7 @@ export async function getTutorialPage(slug?: string): Promise<TutorialPagePayloa
     if (!page) throw new TutorialApiError("NOT_FOUND", "Tutorial content was not found", 404);
     return page;
   }
-  return parseTutorialPagePayload(await fetchJson(buildUrl("get_page", { space: config.tutorialSpace, slug: safeSlug })));
+  return normalizePageAssets(parseTutorialPagePayload(await fetchJson(buildUrl("get_page", { space: config.tutorialSpace, slug: safeSlug }))), config.frappeBaseUrl);
 }
 
 export async function searchTutorial(q: string, limit = 10): Promise<TutorialSearchPayload> {

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
@@ -39,7 +38,7 @@ function publicAssetPath(value: string | undefined, fallback: string): string {
   if (value.startsWith("/")) return value;
   try {
     const url = new URL(value);
-    if (url.hostname === "next.ionicerp.xyz") return `${url.pathname}${url.search}`;
+    if (url.protocol === "https:" || url.protocol === "http:") return value;
   } catch {
     return fallback;
   }
@@ -197,7 +196,7 @@ export default function TutorialPage({ payload }: TutorialPageProps) {
     <div className={`tutorial-page ${styles.page}`} lang="en">
       <header className={styles.topbar}>
         <Link className={styles.brand} href="/tutorial" aria-label={`${space.title} home`}>
-          <Image src={logo} width={24} height={24} alt="" />
+          <img src={logo} width={24} height={24} alt="" />
           <span>{space.title}</span>
           <FiChevronDown className={styles.brandChevron} aria-hidden />
         </Link>
@@ -236,7 +235,7 @@ export default function TutorialPage({ payload }: TutorialPageProps) {
             <div className={styles.rule} />
 
             {article.summary ? <p>{article.summary}</p> : null}
-            {coverImage ? <Image className={styles.heroImage} src={coverImage} width={1024} height={576} sizes="(max-width: 768px) calc(100vw - 32px), 614px" alt="" priority /> : null}
+            {coverImage ? <img className={styles.heroImage} src={coverImage} alt="" /> : null}
             <MarkdownArticle markdown={article.body_markdown} />
 
             {payload.next_article ? (

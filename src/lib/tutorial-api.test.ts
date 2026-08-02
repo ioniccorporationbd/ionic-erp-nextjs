@@ -21,7 +21,7 @@ const validSpacePayload = {
       title: "Ionic Tutorial",
       slug: "ionic-tutorial",
       route_prefix: "/tutorial",
-      logo: "/assets/logo.svg",
+      logo: "/assets/ionic_tutorial/content/spaces/ionic-tutorial/assets/ionic-tutorial-logo.svg",
       learn_url: "https://next.ionicerp.xyz/tutorial/ionic-tutorial/welcome",
       website_url: "https://next.ionicerp.xyz",
       github_url: "https://github.com/ioniccorporationbd/ionic_tutorial",
@@ -75,6 +75,7 @@ describe("Ionic Tutorial API client", () => {
     const payload = await api.getTutorialSpace();
 
     expect(payload.space.slug).toBe("ionic-tutorial");
+    expect(payload.space.logo).toBe("https://next.ionicerp.xyz/assets/ionic_tutorial/content/spaces/ionic-tutorial/assets/ionic-tutorial-logo.svg");
     expect(fetchMock).toHaveBeenCalledWith(
       "https://next.ionicerp.xyz/api/method/ionic_tutorial.api.v1.get_space?space=ionic-tutorial",
       expect.objectContaining({ cache: "force-cache", next: { revalidate: 300 } }),
