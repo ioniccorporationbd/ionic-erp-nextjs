@@ -27,8 +27,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="bn">
-      <body>
+    <html lang="bn" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <div className="site-shell mx-auto max-w-[1920px] bg-[#F3F3F3]">
           <ScrollToTop />
           <div className="marketing-navigation"><NavbarErp /></div>
