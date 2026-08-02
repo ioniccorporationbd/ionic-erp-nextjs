@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   FiChevronDown,
   FiChevronRight,
@@ -15,29 +15,51 @@ import {
   FiX,
 } from "react-icons/fi";
 import styles from "./tutorial.module.css";
-import {
-  tutorialNavigationGroups,
-  tutorialSlug,
-  type TutorialTopic,
-} from "@/content/tutorial-navigation";
+import type { TutorialNavigationCategory, TutorialPagePayload, TutorialTocItem } from "@/types/tutorial";
 
-const articleSections = [
-  { id: "why-frappe-hr", label: "Why Frappe HR", nested: false },
-  { id: "key-features", label: "Key Features", nested: false },
-  { id: "under-the-hood", label: "Under the Hood", nested: false },
-  { id: "installation", label: "Installation", nested: false },
-  { id: "learning-and-community", label: "Learning and Community", nested: true },
-] as const;
+type TutorialPageProps = Readonly<{ payload: TutorialPagePayload }>;
 
-function DocumentationNavigation({ onNavigate, activeTopic }: Readonly<{ onNavigate?: () => void; activeTopic?: TutorialTopic }>) {
-  const [openGroup, setOpenGroup] = useState(activeTopic?.group ?? "Introduction");
+function hrefForSlug(slug: string): string {
+  return `/tutorial/${encodeURIComponent(slug)}`;
+}
+
+function isSafeHttpUrl(value: string | undefined): value is string {
+  if (!value) return false;
+  if (value.startsWith("/")) return true;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+function publicAssetPath(value: string | undefined, fallback: string): string {
+  if (!value) return fallback;
+  if (value.startsWith("/")) return value;
+  try {
+    const url = new URL(value);
+    if (url.hostname === "next.ionicerp.xyz") return `${url.pathname}${url.search}`;
+  } catch {
+    return fallback;
+  }
+  return fallback;
+}
+
+function DocumentationNavigation({
+  navigation,
+  activeSlug,
+  onNavigate,
+}: Readonly<{ navigation: readonly TutorialNavigationCategory[]; activeSlug: string; onNavigate?: () => void }>) {
+  const activeGroup = navigation.find((group) => group.articles.some((article) => article.slug === activeSlug));
+  const [openGroup, setOpenGroup] = useState(activeGroup?.title ?? navigation[0]?.title ?? "");
 
   return (
     <nav className={styles.navigation} aria-label="Documentation navigation">
-      {tutorialNavigationGroups.map((group) => {
+      {navigation.map((group) => {
         const isOpen = openGroup === group.title;
         return (
-          <div key={group.title} className={styles.navGroup}>
+          <div key={group.slug} className={styles.navGroup}>
             <button
               type="button"
               className={styles.navGroupButton}
@@ -47,22 +69,21 @@ function DocumentationNavigation({ onNavigate, activeTopic }: Readonly<{ onNavig
               {isOpen ? <FiChevronDown aria-hidden /> : <FiChevronRight aria-hidden />}
               <span>{group.title}</span>
             </button>
-            {isOpen && group.links ? (
+            {isOpen ? (
               <div className={styles.navLinks}>
-                {group.links.map((link) => {
-                  const slug = tutorialSlug(group.title, link);
-                  const isActive = activeTopic?.slug === slug || (!activeTopic && group.title === "Introduction" && link === "Frappe HR");
+                {group.articles.map((article) => {
+                  const isActive = article.slug === activeSlug;
                   return (
-                  <Link
-                    className={isActive ? styles.activeNavLink : styles.navLink}
-                    href={group.title === "Introduction" && link === "Frappe HR" ? "/tutorial" : `/tutorial/${slug}`}
-                    key={link}
-                    onClick={onNavigate}
-                    aria-current={isActive ? "page" : undefined}
-                    data-tutorial-link={slug}
-                  >
-                    {link}
-                  </Link>
+                    <Link
+                      className={isActive ? styles.activeNavLink : styles.navLink}
+                      href={hrefForSlug(article.slug)}
+                      key={article.slug}
+                      onClick={onNavigate}
+                      aria-current={isActive ? "page" : undefined}
+                      data-tutorial-link={article.slug}
+                    >
+                      {article.title}
+                    </Link>
                   );
                 })}
               </div>
@@ -74,8 +95,98 @@ function DocumentationNavigation({ onNavigate, activeTopic }: Readonly<{ onNavig
   );
 }
 
-export default function TutorialPage({ topic }: Readonly<{ topic?: TutorialTopic }>) {
+function slugifyHeading(text: string): string {
+  return text.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "section";
+}
+
+function renderInline(text: string): ReactNode[] {
+  const nodes: ReactNode[] = [];
+  const pattern = /\[([^\]]+)\]\(([^)]+)\)|`([^`]+)`|\*\*([^*]+)\*\*/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(text))) {
+    if (match.index > lastIndex) nodes.push(text.slice(lastIndex, match.index));
+    if (match[1] && match[2]) {
+      const href = match[2];
+      nodes.push(isSafeHttpUrl(href) ? <a href={href} key={`${href}-${match.index}`}>{match[1]}</a> : match[1]);
+    } else if (match[3]) {
+      nodes.push(<code key={`code-${match.index}`}>{match[3]}</code>);
+    } else if (match[4]) {
+      nodes.push(<strong key={`strong-${match.index}`}>{match[4]}</strong>);
+    }
+    lastIndex = pattern.lastIndex;
+  }
+  if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
+  return nodes;
+}
+
+function MarkdownArticle({ markdown }: Readonly<{ markdown: string }>) {
+  const blocks = useMemo(() => {
+    const lines = markdown.split(/\r?\n/);
+    const result: ReactNode[] = [];
+    let listItems: string[] = [];
+
+    function flushList() {
+      if (!listItems.length) return;
+      result.push(<ul key={`ul-${result.length}`}>{listItems.map((item, index) => <li key={`${item}-${index}`}>{renderInline(item)}</li>)}</ul>);
+      listItems = [];
+    }
+
+    lines.forEach((rawLine) => {
+      const line = rawLine.trim();
+      if (!line) {
+        flushList();
+        return;
+      }
+      const heading = /^(#{1,3})\s+(.+)$/.exec(line);
+      if (heading) {
+        flushList();
+        const level = heading[1].length;
+        const title = heading[2].replace(/#+$/, "").trim();
+        const id = slugifyHeading(title);
+        if (level === 1) result.push(<h1 id={id} key={id}>{title}</h1>);
+        else if (level === 2) result.push(<h2 id={id} key={id}><a href={`#${id}`} aria-label={`Link to ${title}`}>#</a>{title}</h2>);
+        else result.push(<h3 id={id} key={id}><a href={`#${id}`} aria-label={`Link to ${title}`}>#</a>{title}</h3>);
+        return;
+      }
+      const list = /^[-*]\s+(.+)$/.exec(line);
+      if (list) {
+        listItems.push(list[1]);
+        return;
+      }
+      flushList();
+      result.push(<p key={`p-${result.length}`}>{renderInline(line)}</p>);
+    });
+    flushList();
+    return result;
+  }, [markdown]);
+
+  return <>{blocks}</>;
+}
+
+function TopLink({ href, children }: Readonly<{ href?: string; children: ReactNode }>) {
+  if (!isSafeHttpUrl(href)) return null;
+  return <a href={href}>{children}</a>;
+}
+
+function OnThisPage({ toc }: Readonly<{ toc: readonly TutorialTocItem[] }>) {
+  return (
+    <aside className={styles.onThisPage}>
+      <div className={styles.stickyContents}>
+        <strong>On this page</strong>
+        {toc.map((section) => (
+          <a className={section.level > 2 ? styles.nestedContentLink : undefined} href={`#${section.id}`} key={section.id}>{section.title}</a>
+        ))}
+      </div>
+    </aside>
+  );
+}
+
+export default function TutorialPage({ payload }: TutorialPageProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { space, article, navigation } = payload;
+  const logo = publicAssetPath(space.logo, "/assets/tutorial/frappe-hr-logo.png");
+  const coverImage = publicAssetPath(article.cover_image, "");
 
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
@@ -83,11 +194,11 @@ export default function TutorialPage({ topic }: Readonly<{ topic?: TutorialTopic
   }, [mobileMenuOpen]);
 
   return (
-    <div className={`tutorial-page ${styles.page}`}>
+    <div className={`tutorial-page ${styles.page}`} lang="en">
       <header className={styles.topbar}>
-        <Link className={styles.brand} href="/tutorial" aria-label="Frappe HR tutorial home">
-          <Image src="/assets/tutorial/frappe-hr-logo.png" width={24} height={24} alt="" />
-          <span>Frappe HR</span>
+        <Link className={styles.brand} href="/tutorial" aria-label={`${space.title} home`}>
+          <Image src={logo} width={24} height={24} alt="" />
+          <span>{space.title}</span>
           <FiChevronDown className={styles.brandChevron} aria-hidden />
         </Link>
 
@@ -98,10 +209,10 @@ export default function TutorialPage({ topic }: Readonly<{ topic?: TutorialTopic
         </button>
 
         <nav className={styles.topLinks} aria-label="Community links">
-          <a href="https://school.frappe.io/lms/courses">Learn</a>
-          <a href="https://discuss.frappe.io/c/hr/22">Discuss</a>
-          <a href="https://frappe.io/hr">Website</a>
-          <a className={styles.iconLink} href="https://github.com/frappe/hrms" aria-label="Github"><FiGithub /></a>
+          <TopLink href={space.learn_url}>Learn</TopLink>
+          <TopLink href={space.discuss_url}>Discuss</TopLink>
+          <TopLink href={space.website_url}>Website</TopLink>
+          {isSafeHttpUrl(space.github_url) ? <a className={styles.iconLink} href={space.github_url} aria-label="Github"><FiGithub /></a> : null}
           <button className={styles.iconButton} type="button" aria-label="Toggle theme"><FiMoon /></button>
           <button className={styles.mobileSearch} type="button" aria-label="Open search"><FiSearch /></button>
           <button className={styles.mobileMenuButton} type="button" aria-label="Open menu" onClick={() => setMobileMenuOpen(true)}><FiMenu /></button>
@@ -110,81 +221,38 @@ export default function TutorialPage({ topic }: Readonly<{ topic?: TutorialTopic
 
       <div className={styles.shell}>
         <aside className={styles.sidebar}>
-          <DocumentationNavigation activeTopic={topic} />
+          <DocumentationNavigation key={article.slug} navigation={navigation} activeSlug={article.slug} />
         </aside>
 
         <main className={styles.main}>
           <article className={styles.article}>
             <div className={styles.articleToolbar}>
-              <h1 id="page-title">{topic?.title ?? "Frappe HR"}</h1>
+              <h1 id="page-title">{article.title}</h1>
               <div className={styles.pageActions}>
-                <button type="button"><FiEdit2 aria-hidden /><span>Edit</span></button>
+                {isSafeHttpUrl(article.source_url) ? <a href={article.source_url}><FiEdit2 aria-hidden /><span>Source</span></a> : <button type="button"><FiEdit2 aria-hidden /><span>Read</span></button>}
                 <button type="button" aria-label="More page actions"><FiChevronDown aria-hidden /></button>
               </div>
             </div>
             <div className={styles.rule} />
 
-            <p>{topic ? `${topic.title} is an individual tutorial in the ${topic.group} section of Frappe HR. Use this page to understand the feature, its place in the HR workflow, and the related configuration available from the documentation menu.` : "Frappe HR is an open Source, modern, and easy-to-use HR and Payroll Software for all organizations. It has everything you need to drive excellence within the company. It is a complete HRMS solution with over 13 different modules right from Employee Management, Onboarding, Leaves, to Payroll, Taxation, and more!"}</p>
+            {article.summary ? <p>{article.summary}</p> : null}
+            {coverImage ? <Image className={styles.heroImage} src={coverImage} width={1024} height={576} sizes="(max-width: 768px) calc(100vw - 32px), 614px" alt="" priority /> : null}
+            <MarkdownArticle markdown={article.body_markdown} />
 
-            <Image
-              className={styles.heroImage}
-              src="/assets/tutorial/employee-dashboard.png"
-              width={1024}
-              height={576}
-              sizes="(max-width: 768px) calc(100vw - 32px), 614px"
-              alt="Frappe HR employee dashboard"
-              priority
-            />
-
-            <section id="why-frappe-hr">
-              <h2><a href="#why-frappe-hr" aria-label="Link to Why Frappe HR">#</a>Why Frappe HR</h2>
-              <p>Businesses often struggle with scattered HR processes, manual payroll calculations, disconnected employee records, and time-consuming approvals.</p>
-              <ul>
-                <li>Frappe HR brings everything under one roof so HR teams can focus on people, not paperwork.</li>
-                <li>Built for organizations that need a flexible and cost-effective solution, Frappe HR eliminates inefficiencies, ensures compliance, and gives employees a seamless experience.</li>
-                <li>Whether you are managing a handful of employees or scaling to thousands, it helps you stay organized without getting bogged down in administrative overhead.</li>
-              </ul>
-            </section>
-
-            <section id="key-features">
-              <h2><a href="#key-features" aria-label="Link to Key Features">#</a>Key Features</h2>
-              <ul>
-                <li><strong>Employee Lifecycle:</strong> From onboarding employees, managing promotions and transfers, all the way to documenting feedback with exit interviews, make life easier for employees throughout their life cycle.</li>
-                <li><strong>Leave and Attendance:</strong> Configure leave policies, pull regional holidays with a click, check-in and check-out with geolocation capturing, track leave balances and attendance with reports.</li>
-                <li><strong>Expense Claims and Advances:</strong> Manage employee advances, claim expenses, configure multi-level approval workflows, all this with seamless integration with ERPNext accounting.</li>
-                <li><strong>Performance Management:</strong> Track goals, align goals with key result areas (KRAs), enable employees to evaluate themselves, make managing appraisal cycles easy.</li>
-                <li><strong>Payroll &amp; Taxation:</strong> Create salary structures, configure income tax slabs, run standard payroll, accommodate additional salaries and off cycle payments, view income breakup on salary slips and so much more.</li>
-                <li><strong>Frappe HR Mobile App:</strong> Apply for and approve leaves on the go, check-in and check-out, access employee profile right from the mobile app.</li>
-              </ul>
-              <p>And more.</p>
-            </section>
-
-            <section id="under-the-hood">
-              <h2><a href="#under-the-hood" aria-label="Link to Under the Hood">#</a>Under the Hood</h2>
-              <ul>
-                <li><strong><a href="https://github.com/frappe/frappe">Frappe Framework</a>:</strong> A full-stack web application framework written in Python and Javascript. The framework provides a robust foundation for building web applications, including a database abstraction layer, user authentication, and a REST API.</li>
-                <li><strong><a href="https://github.com/frappe/frappe-ui">Frappe UI</a>:</strong> A Vue-based UI library, to provide a modern user interface. The Frappe UI library provides a variety of components that can be used to build single-page applications on top of the Frappe Framework.</li>
-              </ul>
-            </section>
-
-            <section id="installation">
-              <h2><a href="#installation" aria-label="Link to Installation">#</a>Installation</h2>
-              <p>To install/setup the app, follow the <a href="https://github.com/frappe/hrms/?tab=readme-ov-file#production-setup">guidelines here</a>.</p>
-              <h3 id="learning-and-community"><a href="#learning-and-community" aria-label="Link to Learning and Community">#</a>Learning and Community</h3>
-              <ol>
-                <li><a href="https://frappe.school">Frappe School</a> - Learn Frappe Framework and ERPNext from the various courses by the maintainers or from the community.</li>
-                <li><a href="https://docs.frappe.io/hr">Documentation</a> - Extensive documentation for Frappe HR.</li>
-                <li><a href="https://discuss.erpnext.com/">User Forum</a> - Engage with the community of ERPNext users and service providers.</li>
-                <li><a href="https://t.me/frappehr">Telegram Group</a> - Get instant help from the community of users.</li>
-              </ol>
-            </section>
-
-            <a className={styles.nextPage} href="#">
-              <span>Next</span>
-              <strong>Videos</strong>
-              <FiChevronRight aria-hidden />
-            </a>
-            <p className={styles.updated}>Last updated 6 months ago</p>
+            {payload.next_article ? (
+              <Link className={styles.nextPage} href={hrefForSlug(payload.next_article.slug)}>
+                <span>Next</span>
+                <strong>{payload.next_article.title}</strong>
+                <FiChevronRight aria-hidden />
+              </Link>
+            ) : payload.previous_article ? (
+              <Link className={styles.nextPage} href={hrefForSlug(payload.previous_article.slug)}>
+                <span>Previous</span>
+                <strong>{payload.previous_article.title}</strong>
+                <FiChevronRight aria-hidden />
+              </Link>
+            ) : null}
+            <p className={styles.updated}>Last updated {payload.last_modified}</p>
             <div className={styles.feedback}>
               <span>Was this helpful?</span>
               <div><button type="button" aria-label="Bad">☹</button><button type="button" aria-label="Ok">●</button><button type="button" aria-label="Good">☺</button></div>
@@ -192,14 +260,7 @@ export default function TutorialPage({ topic }: Readonly<{ topic?: TutorialTopic
           </article>
         </main>
 
-        <aside className={styles.onThisPage}>
-          <div className={styles.stickyContents}>
-            <strong>On this page</strong>
-            {articleSections.map((section) => (
-              <a className={section.nested ? styles.nestedContentLink : undefined} href={`#${section.id}`} key={section.id}>{section.label}</a>
-            ))}
-          </div>
-        </aside>
+        <OnThisPage toc={payload.table_of_contents} />
       </div>
 
       {mobileMenuOpen ? (
@@ -207,7 +268,7 @@ export default function TutorialPage({ topic }: Readonly<{ topic?: TutorialTopic
           <button className={styles.drawerBackdrop} type="button" aria-label="Close menu" onClick={() => setMobileMenuOpen(false)} />
           <aside className={styles.drawerPanel}>
             <div className={styles.drawerHeader}><strong>Menu</strong><button type="button" aria-label="Close menu" onClick={() => setMobileMenuOpen(false)}><FiX /></button></div>
-            <DocumentationNavigation activeTopic={topic} onNavigate={() => setMobileMenuOpen(false)} />
+            <DocumentationNavigation key={`drawer-${article.slug}`} navigation={navigation} activeSlug={article.slug} onNavigate={() => setMobileMenuOpen(false)} />
           </aside>
         </div>
       ) : null}

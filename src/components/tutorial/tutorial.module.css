@@ -128,7 +128,7 @@
 .articleToolbar { align-items: center; display: flex; justify-content: space-between; }
 .articleToolbar h1 { font-size: 24px; font-weight: 650; line-height: 1.15; margin: 27px 0 0; scroll-margin-top: 75px; }
 .pageActions { display: flex; margin-top: 23px; }
-.pageActions button {
+.pageActions button, .pageActions a {
   align-items: center;
   background: #fff;
   border: 1px solid #e5e5e5;
@@ -139,8 +139,9 @@
   gap: 7px;
   height: 35px;
   padding: 0 12px;
+  text-decoration: none;
 }
-.pageActions button:first-child { border-radius: 8px 0 0 8px; }
+.pageActions button:first-child, .pageActions a:first-child { border-radius: 8px 0 0 8px; }
 .pageActions button:last-child { border-left: 0; border-radius: 0 8px 8px 0; padding: 0 10px; }
 .rule { border-top: 1px solid var(--line); margin: 24px 0; }
 
