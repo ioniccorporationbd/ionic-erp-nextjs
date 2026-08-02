@@ -22,7 +22,7 @@ export function getTutorialConfig() {
     frappeBaseUrl: env("FRAPPE_BASE_URL", DEFAULT_FRAPPE_BASE_URL).replace(/\/+$/, ""),
     tutorialSpace: env("TUTORIAL_SPACE", DEFAULT_TUTORIAL_SPACE),
     revalidateSeconds: Number.isFinite(revalidate) && revalidate > 0 ? revalidate : DEFAULT_TUTORIAL_REVALIDATE_SECONDS,
-    useMocks: process.env.TUTORIAL_USE_MOCKS === "1" && process.env.NODE_ENV !== "production",
+    useMocks: process.env.TUTORIAL_USE_MOCKS === "1",
   };
 }
 
@@ -115,6 +115,7 @@ export async function getTutorialPage(slug?: string): Promise<TutorialPagePayloa
     return getTutorialPage(space.default_article_slug);
   }
   if (config.useMocks) {
+    if (safeSlug === "api-error") throw new TutorialApiError("ERP_UNAVAILABLE", "Mock tutorial ERP API error", 503);
     const page = mockTutorialPages[safeSlug];
     if (!page) throw new TutorialApiError("NOT_FOUND", "Tutorial content was not found", 404);
     return page;

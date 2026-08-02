@@ -1,0 +1,118 @@
+import { expect, test, type Page } from "@playwright/test";
+
+async function openMobileDrawerIfNeeded(page: Page) {
+  if (page.viewportSize()!.width <= 767) {
+    await page.getByRole("button", { name: "Open menu" }).click();
+    await expect(page.getByRole("dialog", { name: "Documentation menu" })).toBeVisible();
+  }
+}
+
+async function openSearchWithShortcut(page: Page) {
+  await page.locator("body").click({ position: { x: 20, y: 20 } });
+  await page.evaluate(() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true })));
+}
+
+test.describe("Ionic Tutorial API-driven documentation", () => {
+  test.describe.configure({ mode: "serial" });
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/");
+    await page.evaluate(() => localStorage.clear());
+  });
+
+  test("default article, landmarks, navigation, heading order, and visual baseline", async ({ page }, testInfo) => {
+    await page.goto("/tutorial");
+    await expect(page.getByRole("banner")).toBeVisible();
+    await expect(page.getByRole("main")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Welcome" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+    if (page.viewportSize()!.width <= 767) {
+      await page.getByRole("button", { name: "Open menu" }).click();
+      await expect(page.getByRole("dialog", { name: "Documentation menu" }).getByRole("navigation", { name: "Documentation navigation" })).toBeVisible();
+      await page.keyboard.press("Escape");
+    } else {
+      await expect(page.getByRole("navigation", { name: "Documentation navigation" }).first()).toBeAttached();
+    }
+    await expect(page.locator("#__next_error__")).toHaveCount(0);
+    await expect(page).toHaveScreenshot(`tutorial-default-${testInfo.project.name}.png`, { fullPage: true, animations: "disabled" });
+  });
+
+  test("deep article link, long article, code blocks, tables, alerts, external links, and visual baseline", async ({ page }, testInfo) => {
+    await page.goto("/tutorial/long-article");
+    await expect(page.getByRole("heading", { level: 1, name: /Long Article/ })).toBeVisible();
+    await expect(page.getByText("bench --site next.ionicerp.xyz migrate")).toBeVisible();
+    await expect(page.getByRole("table")).toBeVisible();
+    await expect(page.getByText("Alert content for accessibility")).toBeVisible();
+    await expect(page.getByRole("link", { name: "External Link" })).toHaveAttribute("rel", /noopener/);
+    await expect(page.getByRole("link", { name: "Unsafe Link" })).toHaveCount(0);
+    await expect(page).toHaveScreenshot(`tutorial-long-${testInfo.project.name}.png`, { animations: "disabled" });
+  });
+
+  test("category expansion, previous/next, and new runtime article added after build", async ({ page }) => {
+    await page.goto("/tutorial/runtime-article");
+    await openMobileDrawerIfNeeded(page);
+    const longCategory = page.getByRole("button", { name: /Long Navigation Category/ }).first();
+    await longCategory.click();
+    await expect(longCategory).toHaveAttribute("aria-expanded", "true");
+    const navScope = page.viewportSize()!.width <= 767 ? page.getByRole("dialog", { name: "Documentation menu" }) : page;
+    await navScope.getByRole("link", { name: /Long Article/ }).first().click();
+    await expect(page).toHaveURL(/\/tutorial\/long-article$/);
+    await page.getByRole("link", { name: /Next New Article Added After Frontend Build/ }).click();
+    await expect(page).toHaveURL(/\/tutorial\/post-build-article$/);
+    await expect(page.getByRole("heading", { level: 1, name: "New Article Added After Frontend Build" })).toBeVisible();
+  });
+
+  test("heading anchors and table-of-contents navigation", async ({ page }) => {
+    await page.goto("/tutorial/long-article");
+    const toc = page.getByLabel("On this page");
+    if (await toc.isVisible()) {
+      await page.getByRole("link", { name: "Table section" }).click();
+      await expect(page).toHaveURL(/#table-section$/);
+    } else {
+      await page.goto("/tutorial/long-article#table-section");
+      await expect(page.locator("#table-section")).toBeVisible();
+    }
+    await page.getByRole("button", { name: "Copy link to Table section" }).click();
+  });
+
+  test("Ctrl/Cmd+K search, keyboard selection, escape, and accessible search", async ({ page }) => {
+    await page.goto("/tutorial");
+    await expect(page.getByRole("heading", { level: 1, name: "Welcome" })).toBeVisible();
+    await openSearchWithShortcut(page);
+    let dialog = page.getByRole("dialog", { name: "Search documentation" });
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    const searchButtonName = page.viewportSize()!.width <= 767 ? "Open mobile search" : "Open search";
+    await page.getByRole("button", { name: searchButtonName }).click();
+    dialog = page.getByRole("dialog", { name: "Search documentation" });
+    await expect(dialog).toBeVisible();
+    await page.getByRole("searchbox").fill("runtime");
+    await expect(dialog.getByRole("link", { name: /Runtime Article/ })).toBeVisible();
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/\/tutorial\/runtime-article$/);
+  });
+
+  test("theme switch persists safely and mobile drawer works", async ({ page }) => {
+    await page.goto("/tutorial");
+    await page.getByRole("button", { name: "Toggle theme" }).click();
+    await expect(page.locator(".tutorial-page[data-theme]")).toHaveAttribute("data-theme", "dark");
+    await page.reload();
+    await expect(page.locator(".tutorial-page[data-theme]")).toHaveAttribute("data-theme", "dark");
+    if (page.viewportSize()!.width <= 767) {
+      await page.getByRole("button", { name: "Open menu" }).click();
+      await expect(page.getByRole("dialog", { name: "Documentation menu" })).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(page.getByRole("dialog", { name: "Documentation menu" })).toHaveCount(0);
+    }
+  });
+
+  test("404 and API error states render without leaking ERP details", async ({ page }) => {
+    await page.goto("/tutorial/does-not-exist");
+    await expect(page.getByRole("heading", { name: "Tutorial page not found" })).toBeVisible();
+    await page.goto("/tutorial/api-error");
+    await expect(page.getByRole("heading", { name: "Unable to load tutorial" })).toBeVisible();
+    await expect(page.getByText(/API returned an error/)).toBeVisible();
+  });
+});

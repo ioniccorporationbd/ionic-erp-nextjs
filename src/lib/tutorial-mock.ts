@@ -25,43 +25,92 @@ export const mockTutorialSpace: TutorialSpacePayload = {
         { title: "Runtime Article", slug: "runtime-article", summary: "A mock runtime-only article.", sort_order: 2 },
       ],
     },
+    {
+      title: "Long Navigation Category With A Name That Must Wrap On Small Screens",
+      slug: "long-navigation",
+      description: "Stress cases.",
+      sort_order: 2,
+      articles: [
+        { title: "Long Article With Code Blocks Tables Alerts Large Images And Very Very Long Titles", slug: "long-article", summary: "Stress article for responsive QA.", sort_order: 1 },
+        { title: "New Article Added After Frontend Build", slug: "post-build-article", summary: "Runtime slug coverage.", sort_order: 2 },
+      ],
+    },
   ],
   default_article_slug: "welcome",
   last_modified: "2026-08-02 00:00:00",
 };
 
-export const mockTutorialPages: Record<string, TutorialPagePayload> = {
-  welcome: {
-    ...mockTutorialSpace,
-    article: {
-      title: "Welcome",
-      slug: "welcome",
-      summary: "Development mock welcome article.",
-      body_markdown: "# Welcome\n\nThis development-only mock proves the frontend can render ERP tutorial content.\n\n## Next steps\n\nUse the live Frappe API outside tests.",
-      seo_title: "Welcome to Ionic Tutorial",
-      seo_description: "Development mock tutorial page.",
-      source_url: "content://ionic-tutorial/articles/welcome.md",
-      sort_order: 1,
-    },
-    table_of_contents: [
-      { id: "welcome", title: "Welcome", level: 1 },
-      { id: "next-steps", title: "Next steps", level: 2 },
-    ],
-    previous_article: null,
-    next_article: { title: "Runtime Article", slug: "runtime-article" },
-    breadcrumbs: [{ title: "Ionic Tutorial", slug: "ionic-tutorial" }, { title: "Welcome", slug: "welcome" }],
+const basePage: TutorialPagePayload = {
+  ...mockTutorialSpace,
+  article: {
+    title: "Welcome",
+    slug: "welcome",
+    summary: "Development mock welcome article.",
+    body_markdown: "# Welcome\n\nThis development-only mock proves the frontend can render ERP tutorial content.\n\n## Next steps\n\nUse the live Frappe API outside tests.\n\n[Runtime Article](/tutorial/runtime-article)",
+    seo_title: "Welcome to Ionic Tutorial",
+    seo_description: "Development mock tutorial page.",
+    source_url: "content://ionic-tutorial/articles/welcome.md",
+    source_updated_at: "2026-08-02 00:00:00",
+    sort_order: 1,
   },
+  table_of_contents: [
+    { id: "welcome", title: "Welcome", level: 1 },
+    { id: "next-steps", title: "Next steps", level: 2 },
+  ],
+  previous_article: null,
+  next_article: { title: "Runtime Article", slug: "runtime-article" },
+  breadcrumbs: [{ title: "Ionic Tutorial", slug: "ionic-tutorial" }, { title: "Welcome", slug: "welcome" }],
+  last_modified: "2026-08-02 00:00:00",
 };
 
-mockTutorialPages["runtime-article"] = {
-  ...mockTutorialPages.welcome,
-  article: {
-    ...mockTutorialPages.welcome.article,
-    title: "Runtime Article",
-    slug: "runtime-article",
-    body_markdown: "# Runtime Article\n\nThis page is not generated from static params.",
+export const mockTutorialPages: Record<string, TutorialPagePayload> = {
+  welcome: basePage,
+  "runtime-article": {
+    ...basePage,
+    article: {
+      ...basePage.article,
+      title: "Runtime Article",
+      slug: "runtime-article",
+      body_markdown: "# Runtime Article\n\nThis page is not generated from static params.\n\n## Runtime heading\n\nNew runtime content loads without a frontend rebuild.",
+    },
+    table_of_contents: [{ id: "runtime-heading", title: "Runtime heading", level: 2 }],
+    previous_article: { title: "Welcome", slug: "welcome" },
+    next_article: { title: "Long Article With Code Blocks Tables Alerts Large Images And Very Very Long Titles", slug: "long-article" },
+    breadcrumbs: [{ title: "Ionic Tutorial", slug: "ionic-tutorial" }, { title: "Runtime Article", slug: "runtime-article" }],
   },
-  previous_article: { title: "Welcome", slug: "welcome" },
-  next_article: null,
-  breadcrumbs: [{ title: "Ionic Tutorial", slug: "ionic-tutorial" }, { title: "Runtime Article", slug: "runtime-article" }],
+  "long-article": {
+    ...basePage,
+    article: {
+      ...basePage.article,
+      title: "Long Article With Code Blocks Tables Alerts Large Images And Very Very Long Titles",
+      slug: "long-article",
+      summary: "A deterministic article for long content, long navigation, and responsive visual coverage.",
+      cover_image: "/assets/erp/erpfixed.png",
+      body_markdown: "# Long Article\n\nLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLong\n\n## Code block\n\n```bash\nbench --site next.ionicerp.xyz migrate\nbench --site next.ionicerp.xyz clear-cache\n```\n\n## Table section\n\n| Feature | Status |\n| --- | --- |\n| Navigation | API driven |\n| Runtime slugs | Supported |\n\n## Lists and alert\n\n- Complete left navigation\n- Keyboard search\n- Mobile drawer\n\n> Alert content for accessibility and wrapping.\n\n[External Link](https://example.com) and [Unsafe Link](javascript:alert(1)).",
+      source_updated_at: "2026-08-02 18:37:15.196692",
+      sort_order: 3,
+    },
+    table_of_contents: [
+      { id: "code-block", title: "Code block", level: 2 },
+      { id: "table-section", title: "Table section", level: 2 },
+      { id: "lists-and-alert", title: "Lists and alert", level: 2 },
+    ],
+    previous_article: { title: "Runtime Article", slug: "runtime-article" },
+    next_article: { title: "New Article Added After Frontend Build", slug: "post-build-article" },
+    breadcrumbs: [{ title: "Ionic Tutorial", slug: "ionic-tutorial" }, { title: "Long Article", slug: "long-article" }],
+  },
+  "post-build-article": {
+    ...basePage,
+    article: {
+      ...basePage.article,
+      title: "New Article Added After Frontend Build",
+      slug: "post-build-article",
+      body_markdown: "# Post Build\n\nThis article simulates ERP content added after the frontend build.",
+      sort_order: 4,
+    },
+    table_of_contents: [{ id: "post-build", title: "Post Build", level: 2 }],
+    previous_article: { title: "Long Article With Code Blocks Tables Alerts Large Images And Very Very Long Titles", slug: "long-article" },
+    next_article: null,
+    breadcrumbs: [{ title: "Ionic Tutorial", slug: "ionic-tutorial" }, { title: "Post Build", slug: "post-build-article" }],
+  },
 };

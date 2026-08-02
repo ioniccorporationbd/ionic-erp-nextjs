@@ -112,7 +112,7 @@ export function TutorialThemeToggle({ theme, onToggle }: Readonly<{ theme: Theme
 export function TutorialHeader({ payload, theme, onToggleTheme, onOpenSearch, onOpenMenu }: Readonly<{ payload: TutorialPagePayload; theme: ThemeName; onToggleTheme: () => void; onOpenSearch: () => void; onOpenMenu: () => void }>) {
   const { space } = payload;
   return (
-    <header className={styles.topbar}>
+    <header className={styles.topbar} role="banner">
       <TutorialBrand space={space} />
       <button type="button" className={styles.desktopSearch} aria-label="Open search" onClick={onOpenSearch}>
         <FiSearch aria-hidden /><span>Search documentation</span><kbd>Ctrl K</kbd>
@@ -297,12 +297,13 @@ export function TutorialShell({ payload }: TutorialPageProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeId, setActiveId] = useState(payload.table_of_contents[0]?.id);
-  const [theme, setTheme] = useState<ThemeName>(() => {
-    if (typeof window === "undefined") return "light";
-    const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-    return stored === "dark" || stored === "light" ? stored : "light";
-  });
+  const [theme, setTheme] = useState<ThemeName>("light");
   const searchRows = useMemo(() => allSearchRows(payload.navigation), [payload.navigation]);
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (stored === "dark" || stored === "light") window.setTimeout(() => setTheme(stored), 0);
+  }, []);
 
   useEffect(() => {
     const handler = (event: globalThis.KeyboardEvent) => {
@@ -335,7 +336,7 @@ export function TutorialShell({ payload }: TutorialPageProps) {
       <TutorialHeader payload={payload} theme={theme} onToggleTheme={toggleTheme} onOpenSearch={() => setSearchOpen(true)} onOpenMenu={() => setMobileMenuOpen(true)} />
       <div className={styles.shell}>
         <aside className={styles.sidebar}><TutorialSidebar navigation={payload.navigation} activeSlug={payload.article.slug} /></aside>
-        <main className={styles.main}><TutorialArticle payload={payload} /></main>
+        <div className={styles.main}><TutorialArticle payload={payload} /></div>
         <TutorialTableOfContents toc={payload.table_of_contents} activeId={activeId} />
       </div>
       <TutorialSearchDialog rows={searchRows} open={searchOpen} onClose={() => setSearchOpen(false)} />
