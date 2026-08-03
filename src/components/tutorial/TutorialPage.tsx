@@ -11,6 +11,7 @@ type SearchRow = TutorialNavigationArticle & Readonly<{ category: string }>;
 type ThemeName = "light" | "dark";
 
 const THEME_STORAGE_KEY = "ionic-tutorial-theme";
+const TUTORIAL_LINK_PREFETCH = false;
 
 function hrefForSlug(slug: string): string {
   return `/tutorial/${encodeURIComponent(slug)}`;
@@ -59,7 +60,7 @@ function allSearchRows(navigation: readonly TutorialNavigationCategory[]): Searc
 function renderSafeLink(href: string, children: ReactNode, key?: string) {
   const safe = safeHref(href);
   if (!safe) return <span key={key}>{children}</span>;
-  if (safe.startsWith("/tutorial/")) return <Link href={safe} key={key}>{children}</Link>;
+  if (safe.startsWith("/tutorial/")) return <Link href={safe} key={key} prefetch={TUTORIAL_LINK_PREFETCH}>{children}</Link>;
   return <a href={safe} key={key} rel={isExternalUrl(safe) ? "noopener noreferrer" : undefined} target={isExternalUrl(safe) ? "_blank" : undefined}>{children}</a>;
 }
 
@@ -91,7 +92,7 @@ function copyHeadingLink(id: string) {
 export function TutorialBrand({ space }: Readonly<{ space: TutorialPagePayload["space"] }>) {
   const logo = publicAssetPath(space.logo, "/assets/tutorial/frappe-hr-logo.png");
   return (
-    <Link className={styles.brand} href="/tutorial" aria-label={`${space.title} home`}>
+    <Link className={styles.brand} href="/tutorial" aria-label={`${space.title} home`} prefetch={TUTORIAL_LINK_PREFETCH}>
       <img src={logo} width={24} height={24} alt="" />
       <span>{space.title}</span>
       <FiChevronDown className={styles.brandChevron} aria-hidden />
@@ -141,7 +142,7 @@ export function TutorialCategory({ group, activeSlug, defaultOpen, onNavigate }:
         <div className={styles.navLinks}>
           {group.articles.map((article) => {
             const isActive = article.slug === activeSlug;
-            return <Link className={isActive ? styles.activeNavLink : styles.navLink} href={hrefForSlug(article.slug)} key={article.slug} onClick={onNavigate} aria-current={isActive ? "page" : undefined}>{article.title}</Link>;
+            return <Link className={isActive ? styles.activeNavLink : styles.navLink} href={hrefForSlug(article.slug)} key={article.slug} onClick={onNavigate} aria-current={isActive ? "page" : undefined} prefetch={TUTORIAL_LINK_PREFETCH}>{article.title}</Link>;
           })}
         </div>
       ) : null}
@@ -234,8 +235,8 @@ function MarkdownArticle({ markdown }: Readonly<{ markdown: string }>) {
 export function TutorialPager({ previous, next }: Readonly<{ previous: TutorialAdjacentArticle | null; next: TutorialAdjacentArticle | null }>) {
   return (
     <nav className={styles.pager} aria-label="Article pagination">
-      {previous ? <Link className={styles.nextPage} href={hrefForSlug(previous.slug)}><span>Previous</span><strong>{previous.title}</strong><FiChevronRight aria-hidden /></Link> : <span />}
-      {next ? <Link className={styles.nextPage} href={hrefForSlug(next.slug)}><span>Next</span><strong>{next.title}</strong><FiChevronRight aria-hidden /></Link> : null}
+      {previous ? <Link className={styles.nextPage} href={hrefForSlug(previous.slug)} prefetch={TUTORIAL_LINK_PREFETCH}><span>Previous</span><strong>{previous.title}</strong><FiChevronRight aria-hidden /></Link> : <span />}
+      {next ? <Link className={styles.nextPage} href={hrefForSlug(next.slug)} prefetch={TUTORIAL_LINK_PREFETCH}><span>Next</span><strong>{next.title}</strong><FiChevronRight aria-hidden /></Link> : null}
     </nav>
   );
 }
@@ -277,7 +278,7 @@ export function TutorialSearchDialog({ rows, open, onClose }: Readonly<{ rows: r
       <button className={styles.searchBackdrop} type="button" aria-label="Close search" onClick={onClose} />
       <div className={styles.searchPanel}>
         <label className={styles.searchBox}><FiSearch aria-hidden /><input ref={inputRef} role="searchbox" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search documentation" /></label>
-        <div className={styles.searchResults}>{results.map((row) => <Link key={row.slug} href={hrefForSlug(row.slug)} onClick={onClose}><strong>{row.title}</strong><span>{row.category}</span>{row.summary ? <p>{row.summary}</p> : null}</Link>)}</div>
+        <div className={styles.searchResults}>{results.map((row) => <Link key={row.slug} href={hrefForSlug(row.slug)} onClick={onClose} prefetch={TUTORIAL_LINK_PREFETCH}><strong>{row.title}</strong><span>{row.category}</span>{row.summary ? <p>{row.summary}</p> : null}</Link>)}</div>
       </div>
     </div>
   );
@@ -290,7 +291,7 @@ export function TutorialMobileDrawer({ open, navigation, activeSlug, onClose }: 
 }
 
 export function TutorialErrorState({ title = "Tutorial unavailable", message = "Please try again later." }: Readonly<{ title?: string; message?: string }>) {
-  return <main className={styles.errorState} lang="en"><h1>{title}</h1><p>{message}</p><Link href="/tutorial">Back to tutorial home</Link></main>;
+  return <main className={styles.errorState} lang="en"><h1>{title}</h1><p>{message}</p><Link href="/tutorial" prefetch={TUTORIAL_LINK_PREFETCH}>Back to tutorial home</Link></main>;
 }
 
 export function TutorialShell({ payload }: TutorialPageProps) {

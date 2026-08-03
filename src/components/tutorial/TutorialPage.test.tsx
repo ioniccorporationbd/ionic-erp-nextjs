@@ -1,8 +1,15 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import TutorialPage from "./TutorialPage";
 import type { TutorialPagePayload } from "@/types/tutorial";
+
+vi.mock("next/link", () => ({
+  default: ({ children, href, prefetch, ...props }: AnchorHTMLAttributes<HTMLAnchorElement> & { children: ReactNode; href: string; prefetch?: boolean }) => (
+    <a href={href} data-prefetch={String(prefetch)} {...props}>{children}</a>
+  ),
+}));
 
 const payload: TutorialPagePayload = {
   schema_version: "v1",
@@ -53,7 +60,9 @@ describe("TutorialPage Frappe-style shell", () => {
     expect(screen.getByRole("complementary", { name: "On this page" })).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getByRole("link", { name: "Welcome" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Welcome" })).toHaveAttribute("data-prefetch", "false");
     expect(screen.getByRole("link", { name: /Next Runtime Article/ })).toHaveAttribute("href", "/tutorial/runtime-article");
+    expect(screen.getByRole("link", { name: /Next Runtime Article/ })).toHaveAttribute("data-prefetch", "false");
 
     expect(screen.getByText("bench --site next.ionicerp.xyz migrate")).toBeInTheDocument();
     expect(screen.getByRole("table")).toBeInTheDocument();
@@ -65,6 +74,7 @@ describe("TutorialPage Frappe-style shell", () => {
     const dialog = screen.getByRole("dialog", { name: "Search documentation" });
     await user.type(within(dialog).getByRole("searchbox"), "runtime");
     expect(within(dialog).getByRole("link", { name: /Runtime Article/ })).toHaveAttribute("href", "/tutorial/runtime-article");
+    expect(within(dialog).getByRole("link", { name: /Runtime Article/ })).toHaveAttribute("data-prefetch", "false");
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog", { name: "Search documentation" })).not.toBeInTheDocument();
 
