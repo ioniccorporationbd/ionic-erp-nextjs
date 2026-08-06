@@ -1,20 +1,27 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import TutorialPage from "@/components/tutorial/TutorialPage";
-import { getTutorialPage, tutorialCanonicalUrl } from "@/lib/tutorial-api";
+import { getTutorialConfig, getTutorialPage, getTutorialSpaces, tutorialCanonicalUrl } from "@/lib/tutorial-api";
 import { TutorialApiError, type TutorialPagePayload } from "@/types/tutorial";
 
 interface TutorialTopicRouteProps {
   readonly params: Promise<{ slug: string }>;
+  readonly searchParams: Promise<{ space?: string }>;
 }
 
-export async function generateMetadata({ params }: TutorialTopicRouteProps): Promise<Metadata> {
+function selectedSpace(searchParams: { space?: string }): string | undefined {
+  const raw = searchParams.space?.trim();
+  return raw ? raw : undefined;
+}
+
+export async function generateMetadata({ params, searchParams }: TutorialTopicRouteProps): Promise<Metadata> {
   const { slug } = await params;
   try {
-    const payload = await getTutorialPage(slug);
+    const space = selectedSpace(await searchParams);
+    const payload = await getTutorialPage(slug, space);
     const title = payload.article.seo_title || payload.article.title;
     const description = payload.article.seo_description || payload.article.summary || payload.space.short_description;
-    const canonical = tutorialCanonicalUrl(payload.article.slug);
+    const canonical = tutorialCanonicalUrl(payload.article.slug, space);
     return {
       metadataBase: new URL((process.env.SITE_BASE_URL || "https://www.ionicerp.xyz").replace(/\/+$/, "")),
       title,
@@ -34,17 +41,19 @@ export async function generateMetadata({ params }: TutorialTopicRouteProps): Pro
   }
 }
 
-async function loadTutorialPage(slug: string): Promise<TutorialPagePayload> {
+async function loadTutorialPage(slug: string, space?: string): Promise<TutorialPagePayload> {
   try {
-    return await getTutorialPage(slug);
+    return await getTutorialPage(slug, space);
   } catch (error) {
     if (error instanceof TutorialApiError && error.code === "NOT_FOUND") notFound();
     throw error;
   }
 }
 
-export default async function TutorialTopicRoute({ params }: TutorialTopicRouteProps) {
+export default async function TutorialTopicRoute({ params, searchParams }: TutorialTopicRouteProps) {
   const { slug } = await params;
-  const payload = await loadTutorialPage(slug);
-  return <TutorialPage payload={payload} />;
+  const space = selectedSpace(await searchParams);
+  const payload = await loadTutorialPage(slug, space);
+  const spacesPayload = await getTutorialSpaces().catch(() => null);
+  return <TutorialPage payload={payload} spaces={spacesPayload?.items ?? null} defaultSpace={getTutorialConfig().tutorialSpace} />;
 }

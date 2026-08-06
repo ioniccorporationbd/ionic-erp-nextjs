@@ -1,4 +1,31 @@
-import type { TutorialPagePayload, TutorialSpacePayload } from "@/types/tutorial";
+import type { TutorialPagePayload, TutorialSpacePayload, TutorialSpacesPayload } from "@/types/tutorial";
+
+export const mockTutorialSpaces: TutorialSpacesPayload = {
+  schema_version: "v1",
+  items: [
+    {
+      title: "Ionic Tutorial",
+      slug: "ionic-tutorial",
+      route_prefix: "/tutorial",
+      source_app: "ionic_tutorial",
+      logo: "/assets/tutorial/frappe-hr-logo.png",
+      short_description: "Development tutorial mock content.",
+      learn_url: "/tutorial/welcome",
+      discuss_url: "https://github.com/ioniccorporationbd/ionic_tutorial/discussions",
+      website_url: "https://next.ionicerp.xyz",
+      github_url: "https://github.com/ioniccorporationbd/ionic_tutorial",
+    },
+    {
+      title: "Ionic POS",
+      slug: "ionic-pos",
+      route_prefix: "/tutorial",
+      source_app: "ionic_tutorial",
+      logo: "/assets/tutorial/frappe-hr-logo.png",
+      short_description: "Point of sale mock space.",
+    },
+  ],
+  last_modified: "2026-08-02 00:00:00",
+};
 
 export const mockTutorialSpace: TutorialSpacePayload = {
   schema_version: "v1",

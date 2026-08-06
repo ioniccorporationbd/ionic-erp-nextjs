@@ -84,4 +84,74 @@ describe("TutorialPage Frappe-style shell", () => {
     await user.click(screen.getByRole("button", { name: "Copy link to Install" }));
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining("#install"));
   });
+
+  it("renders an accessible space dropdown with the current space highlighted and ?space= links", async () => {
+    const user = userEvent.setup();
+    const spaces = [
+      { title: "Ionic Tutorial", slug: "ionic-tutorial", route_prefix: "/tutorial", short_description: "Docs" },
+      { title: "Ionic POS", slug: "ionic-pos", route_prefix: "/tutorial", short_description: "POS docs" },
+    ];
+    render(<TutorialPage payload={payload} spaces={spaces} defaultSpace="ionic-tutorial" />);
+
+    const trigger = screen.getByRole("button", { name: /choose tutorial space/ });
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+    await user.click(trigger);
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+    const listbox = screen.getByRole("listbox", { name: "Tutorial spaces" });
+    const current = within(listbox).getByRole("option", { name: /Ionic Tutorial/ });
+    expect(current).toHaveAttribute("aria-current", "true");
+    const pos = within(listbox).getByRole("option", { name: /Ionic POS/ });
+    expect(within(pos).getByRole("link")).toHaveAttribute("href", "/tutorial?space=ionic-pos");
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("listbox", { name: "Tutorial spaces" })).not.toBeInTheDocument();
+  });
+
+  it("falls back to the current space only when the space list is unavailable", async () => {
+    const user = userEvent.setup();
+    render(<TutorialPage payload={payload} spaces={null} defaultSpace="ionic-tutorial" />);
+    await user.click(screen.getByRole("button", { name: /choose tutorial space/ }));
+    const listbox = screen.getByRole("listbox", { name: "Tutorial spaces" });
+    expect(within(listbox).getAllByRole("option")).toHaveLength(1);
+    expect(within(listbox).getByRole("option", { name: /Ionic Tutorial/ })).toHaveAttribute("aria-current", "true");
+  });
+
+  it("scopes every navigation, pager, and search link with ?space= for a non-default space", async () => {
+    const user = userEvent.setup();
+    const posPayload = { ...payload, space: { ...payload.space, slug: "ionic-pos", title: "Ionic POS" } };
+    render(<TutorialPage payload={posPayload} spaces={null} defaultSpace="ionic-tutorial" />);
+
+    expect(screen.getByRole("link", { name: "Welcome" })).toHaveAttribute("href", "/tutorial/welcome?space=ionic-pos");
+    expect(screen.getByRole("link", { name: /Next Runtime Article/ })).toHaveAttribute("href", "/tutorial/runtime-article?space=ionic-pos");
+    await user.click(screen.getByRole("button", { name: "Open search" }));
+    const dialog = screen.getByRole("dialog", { name: "Search documentation" });
+    expect(within(dialog).getByRole("link", { name: /Runtime Article/ })).toHaveAttribute("href", "/tutorial/runtime-article?space=ionic-pos");
+  });
+
+  it("hides sidebar categories that have no published articles", () => {
+    const emptyGroup = { title: "Empty Category", slug: "empty", sort_order: 9, articles: [] };
+    const withEmpty = { ...payload, navigation: [...payload.navigation, emptyGroup] };
+    render(<TutorialPage payload={withEmpty} />);
+    expect(screen.queryByRole("button", { name: /Empty Category/ })).not.toBeInTheDocument();
+  });
+
+  it("shows an empty state and paginates search results", async () => {
+    const user = userEvent.setup();
+    const manyArticles = Array.from({ length: 10 }, (_, index) => ({ title: `Article ${index + 1}`, slug: `article-${index + 1}`, summary: "Match me", sort_order: index + 1 }));
+    const manyPayload = { ...payload, navigation: [{ title: "Many", slug: "many", sort_order: 1, articles: manyArticles }] };
+    render(<TutorialPage payload={manyPayload} />);
+    await user.click(screen.getByRole("button", { name: "Open search" }));
+    const dialog = screen.getByRole("dialog", { name: "Search documentation" });
+    const searchbox = within(dialog).getByRole("searchbox");
+    await user.type(searchbox, "match");
+    expect(within(dialog).getByText(/Showing 1–8 of 10/)).toBeInTheDocument();
+    const next = within(dialog).getByRole("button", { name: "Next" });
+    expect(within(dialog).getByRole("button", { name: "Previous" })).toBeDisabled();
+    await user.click(next);
+    expect(within(dialog).getByText(/Showing 9–10 of 10/)).toBeInTheDocument();
+    expect(within(dialog).getByRole("link", { name: /Article 10/ })).toBeInTheDocument();
+    expect(next).toBeDisabled();
+    await user.clear(searchbox);
+    await user.type(searchbox, "zzz-no-match");
+    expect(within(dialog).getByText(/No results for/)).toBeInTheDocument();
+  });
 });

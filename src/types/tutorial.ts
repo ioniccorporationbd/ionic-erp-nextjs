@@ -64,7 +64,13 @@ export interface TutorialSpacePayload {
   readonly last_modified: string;
 }
 
-export interface TutorialPagePayload {
+export type TutorialSpacesPayload = {
+  schema_version: "v1";
+  items: TutorialSpaceSettings[];
+  last_modified?: string;
+};
+
+export type TutorialPagePayload = {
   readonly schema_version: "v1";
   readonly space: TutorialSpaceSettings;
   readonly navigation: readonly TutorialNavigationCategory[];

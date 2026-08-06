@@ -9,6 +9,7 @@ import type {
   TutorialSearchResult,
   TutorialSpacePayload,
   TutorialSpaceSettings,
+  TutorialSpacesPayload,
   TutorialTocItem,
 } from "@/types/tutorial";
 import { TutorialApiError } from "@/types/tutorial";
@@ -137,6 +138,15 @@ function parseSearchResult(value: unknown): TutorialSearchResult {
     category: stringField(value, "category")!,
     excerpt: stringField(value, "excerpt")!,
     matched_heading: stringField(value, "matched_heading", false),
+  };
+}
+
+export function parseTutorialSpacesPayload(payload: unknown): TutorialSpacesPayload {
+  const message = messagePayload(payload);
+  return {
+    schema_version: "v1",
+    items: arrayField(message, "items").map(parseSpaceSettings),
+    last_modified: stringField(message, "last_modified", false),
   };
 }
 

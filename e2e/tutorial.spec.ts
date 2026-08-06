@@ -108,6 +108,19 @@ test.describe("Ionic Tutorial API-driven documentation", () => {
     }
   });
 
+  test("space dropdown lists published spaces and scopes navigation with ?space=", async ({ page }) => {
+    await page.goto("/tutorial");
+    await page.getByRole("button", { name: /choose tutorial space/ }).click();
+    const listbox = page.getByRole("listbox", { name: "Tutorial spaces" });
+    await expect(listbox).toBeVisible();
+    await expect(listbox.getByRole("option", { name: /Ionic POS/ })).toBeVisible();
+    await expect(listbox.getByRole("option", { name: /Ionic Tutorial/ })).toHaveAttribute("aria-current", "true");
+    await listbox.getByRole("option", { name: /Ionic POS/ }).getByRole("link").click();
+    await expect(page).toHaveURL(/\?space=ionic-pos$/);
+    // The pager is present on every viewport (the sidebar link is hidden on mobile).
+    await expect(page.getByRole("link", { name: /Next Runtime Article/ })).toHaveAttribute("href", "/tutorial/runtime-article?space=ionic-pos");
+  });
+
   test("404 and API error states render without leaking ERP details", async ({ page }) => {
     await page.goto("/tutorial/does-not-exist");
     await expect(page.getByRole("heading", { name: "Tutorial page not found" })).toBeVisible();

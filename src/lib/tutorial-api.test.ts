@@ -128,4 +128,77 @@ describe("Ionic Tutorial API client", () => {
     const page = await api.getTutorialPage("new-runtime-slug");
     expect(page.article.slug).toBe("new-runtime-slug");
   });
+
+  it("maps legacy ERP 417 validation errors to not-found like 404", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ exc_type: "ValidationError" }, { status: 417 })));
+    const api = await loadApi();
+    await expect(api.getTutorialPage("missing-article")).rejects.toMatchObject({ code: "NOT_FOUND", status: 417 });
+  });
+
+  it("absolutizes /files/ asset paths against the ERP base URL", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({
+      ...validPagePayload,
+      message: {
+        ...validPagePayload.message,
+        space: { ...validPagePayload.message.space, logo: "/files/tamim-hassan-logo.png" },
+        article: { ...validPagePayload.message.article, cover_image: "/files/cover.png" },
+      },
+    })));
+    const api = await loadApi();
+    const page = await api.getTutorialPage("welcome");
+    expect(page.space.logo).toBe("https://next.ionicerp.xyz/files/tamim-hassan-logo.png");
+    expect(page.article.cover_image).toBe("https://next.ionicerp.xyz/files/cover.png");
+  });
+
+  it("defaults to a 60s revalidate and allows 0 to disable caching entirely", async () => {
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse(validSpacePayload)));
+    vi.stubGlobal("fetch", fetchMock);
+    let api = await loadApi();
+    await api.getTutorialSpace();
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({ cache: "force-cache", next: { revalidate: 60 } });
+
+    process.env.TUTORIAL_REVALIDATE_SECONDS = "0";
+    api = await loadApi();
+    await api.getTutorialSpace();
+    expect(fetchMock.mock.calls[1][1]).toMatchObject({ cache: "no-store" });
+    expect(fetchMock.mock.calls[1][1]).not.toHaveProperty("next");
+  });
+
+  it("fetches and normalizes the published space list for the dropdown", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({
+      message: {
+        schema_version: "v1",
+        items: [
+          { title: "Ionic Tutorial", slug: "ionic-tutorial", route_prefix: "/tutorial", logo: "/files/logo-a.svg", short_description: "Docs" },
+          { title: "Ionic POS", slug: "ionic-pos", route_prefix: "/tutorial" },
+        ],
+        last_modified: "2026-08-02 00:00:00",
+      },
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+    const api = await loadApi();
+    const payload = await api.getTutorialSpaces(50);
+    expect(payload.items.map((item) => item.slug)).toEqual(["ionic-tutorial", "ionic-pos"]);
+    expect(payload.items[0].logo).toBe("https://next.ionicerp.xyz/files/logo-a.svg");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://next.ionicerp.xyz/api/method/ionic_tutorial.api.v1.list_spaces?limit=50",
+      expect.anything(),
+    );
+  });
+
+  it("threads an explicit ?space= selection into every ERP call", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(validPagePayload));
+    vi.stubGlobal("fetch", fetchMock);
+    const api = await loadApi();
+    await api.getTutorialPage("welcome", "ionic-pos");
+    expect(fetchMock.mock.calls[0][0]).toContain("api/method/ionic_tutorial.api.v1.get_page?space=ionic-pos&slug=welcome");
+  });
+
+  it("keeps clean hrefs for the default space and scopes others with ?space=", async () => {
+    const api = await loadApi();
+    expect(api.tutorialHref("welcome", "ionic-tutorial", "ionic-tutorial")).toBe("/tutorial/welcome");
+    expect(api.tutorialHref("welcome", "ionic-pos", "ionic-tutorial")).toBe("/tutorial/welcome?space=ionic-pos");
+    expect(api.tutorialHref(null, "ionic-pos", "ionic-tutorial")).toBe("/tutorial?space=ionic-pos");
+    expect(api.tutorialHref("welcome")).toBe("/tutorial/welcome");
+  });
 });
