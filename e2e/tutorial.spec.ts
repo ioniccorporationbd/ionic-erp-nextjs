@@ -20,6 +20,26 @@ test.describe("Ionic Tutorial API-driven documentation", () => {
     await page.evaluate(() => localStorage.clear());
   });
 
+  test("tutorial pages hydrate without hydration mismatch warnings", async ({ page }) => {
+    // Regression guard: a server/client HTML mismatch (e.g. a component
+    // branching on data that differs between SSR and the first client
+    // render) logs a React hydration warning even in production builds.
+    const hydrationWarnings: string[] = [];
+    page.on("console", (message) => {
+      const text = message.text();
+      if (/hydrat|didn't match|did not match/i.test(text)) hydrationWarnings.push(text);
+    });
+    page.on("pageerror", (error) => {
+      if (/hydrat|didn't match|did not match/i.test(error.message)) hydrationWarnings.push(error.message);
+    });
+
+    for (const path of ["/tutorial", "/tutorial/long-article", "/tutorial?space=ionic-pos", "/tutorial/runtime-article"]) {
+      await page.goto(path);
+      await expect(page.locator("#__next_error__")).toHaveCount(0);
+    }
+    expect(hydrationWarnings, hydrationWarnings.join("\n---\n") || "no hydration warnings logged").toEqual([]);
+  });
+
   test("default article, landmarks, navigation, heading order, and visual baseline", async ({ page }, testInfo) => {
     await page.goto("/tutorial");
     await expect(page.getByRole("banner")).toBeVisible();
