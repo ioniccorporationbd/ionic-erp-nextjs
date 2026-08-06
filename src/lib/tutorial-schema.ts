@@ -156,7 +156,7 @@ export function parseTutorialSpacePayload(payload: unknown): TutorialSpacePayloa
     schema_version: "v1",
     space: parseSpaceSettings(message.space),
     navigation: arrayField(message, "navigation").map(parseNavCategory),
-    default_article_slug: stringField(message, "default_article_slug")!,
+    default_article_slug: stringField(message, "default_article_slug", false),
     last_modified: stringField(message, "last_modified")!,
   };
 }

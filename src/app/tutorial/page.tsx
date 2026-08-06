@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import TutorialEmptyState from "@/components/tutorial/TutorialEmptyState";
 import TutorialPage from "@/components/tutorial/TutorialPage";
-import { getTutorialConfig, getTutorialPage, getTutorialSpaces, tutorialCanonicalUrl } from "@/lib/tutorial-api";
+import { getTutorialConfig, getTutorialPage, getTutorialSpaces, getTutorialSpace, tutorialCanonicalUrl } from "@/lib/tutorial-api";
 import { TutorialApiError, type TutorialPagePayload } from "@/types/tutorial";
 
 interface TutorialRouteProps {
@@ -49,7 +50,27 @@ async function loadTutorialHome(space?: string): Promise<TutorialPagePayload> {
 
 export default async function TutorialRoute({ searchParams }: TutorialRouteProps) {
   const space = selectedSpace(await searchParams);
-  const payload = await loadTutorialHome(space);
+  let payload: TutorialPagePayload;
+  try {
+    payload = await loadTutorialHome(space);
+  } catch (error) {
+    if (error instanceof TutorialApiError && error.code === "SPACE_EMPTY") {
+      // The space exists but has no published content yet — show a friendly
+      // empty state (with other spaces still reachable) instead of an error.
+      const [spacesPayload, spacePayload] = await Promise.all([
+        getTutorialSpaces().catch(() => null),
+        getTutorialSpace(space).catch(() => null),
+      ]);
+      return (
+        <TutorialEmptyState
+          space={spacePayload?.space ?? null}
+          spaces={spacesPayload?.items ?? null}
+          defaultSpace={getTutorialConfig().tutorialSpace}
+        />
+      );
+    }
+    throw error;
+  }
   // The space list powers the header dropdown; if it is temporarily
   // unavailable the page still renders with the current space only.
   const spacesPayload = await getTutorialSpaces().catch(() => null);

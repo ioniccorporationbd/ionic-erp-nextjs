@@ -148,4 +148,14 @@ test.describe("Ionic Tutorial API-driven documentation", () => {
     await expect(page.getByRole("heading", { name: "Unable to load tutorial" })).toBeVisible();
     await expect(page.getByText(/API returned an error/)).toBeVisible();
   });
+
+  test("a published space without content renders a friendly empty state instead of an error", async ({ page }) => {
+    await page.goto("/tutorial?space=empty-space");
+    await expect(page.getByRole("heading", { level: 1, name: "খালি Space" })).toBeVisible();
+    await expect(page.getByText("এই space-এ এখনো কোনো প্রকাশিত নথি নেই।")).toBeVisible();
+    // Other published spaces stay reachable from the empty state.
+    await expect(page.getByRole("link", { name: "Ionic Tutorial" })).toHaveAttribute("href", "/tutorial");
+    await expect(page.getByRole("link", { name: "Ionic POS" })).toHaveAttribute("href", "/tutorial?space=ionic-pos");
+    await expect(page.locator("#__next_error__")).toHaveCount(0);
+  });
 });

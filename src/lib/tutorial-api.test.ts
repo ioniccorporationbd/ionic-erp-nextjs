@@ -89,6 +89,27 @@ describe("Ionic Tutorial API client", () => {
     await expect(api.getTutorialSpace()).rejects.toMatchObject({ code: "INVALID_PAYLOAD" });
   });
 
+  it("accepts a published space whose default article is not published yet", async () => {
+    process.env.FRAPPE_BASE_URL = "https://next.ionicerp.xyz";
+    const emptySpace = { message: { ...validSpacePayload.message, default_article_slug: null, navigation: [] } };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(emptySpace)));
+    const api = await loadApi();
+
+    const payload = await api.getTutorialSpace();
+
+    expect(payload.default_article_slug).toBeUndefined();
+    expect(payload.space.slug).toBe("ionic-tutorial");
+  });
+
+  it("maps a space without published content to a typed empty-space error", async () => {
+    process.env.FRAPPE_BASE_URL = "https://next.ionicerp.xyz";
+    const emptySpace = { message: { ...validSpacePayload.message, default_article_slug: null, navigation: [] } };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(emptySpace)));
+    const api = await loadApi();
+
+    await expect(api.getTutorialPage(undefined)).rejects.toMatchObject({ code: "SPACE_EMPTY" });
+  });
+
   it("maps ERP 404 to a typed not-found error", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ exc_type: "DoesNotExistError" }, { status: 404 })));
     const api = await loadApi();

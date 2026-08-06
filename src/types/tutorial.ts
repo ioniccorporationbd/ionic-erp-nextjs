@@ -60,7 +60,7 @@ export interface TutorialSpacePayload {
   readonly schema_version: "v1";
   readonly space: TutorialSpaceSettings;
   readonly navigation: readonly TutorialNavigationCategory[];
-  readonly default_article_slug: string;
+  readonly default_article_slug?: string;
   readonly last_modified: string;
 }
 
@@ -98,7 +98,7 @@ export interface TutorialSearchPayload {
   readonly results: readonly TutorialSearchResult[];
 }
 
-export type TutorialApiErrorCode = "BAD_REQUEST" | "NOT_FOUND" | "ERP_UNAVAILABLE" | "INVALID_PAYLOAD" | "TIMEOUT";
+export type TutorialApiErrorCode = "BAD_REQUEST" | "NOT_FOUND" | "ERP_UNAVAILABLE" | "INVALID_PAYLOAD" | "TIMEOUT" | "SPACE_EMPTY";
 
 export class TutorialApiError extends Error {
   readonly code: TutorialApiErrorCode;

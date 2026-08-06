@@ -122,6 +122,10 @@ export async function getTutorialSpace(space?: string): Promise<TutorialSpacePay
   const config = getTutorialConfig();
   const safeSpace = space?.trim() || config.tutorialSpace;
   if (config.useMocks) {
+    if (safeSpace === "empty-space") {
+      // Scenario for e2e: a published space that has no published content yet.
+      return { ...mockTutorialSpace, navigation: [], default_article_slug: undefined, space: { ...mockTutorialSpace.space, slug: safeSpace, title: "খালি Space", short_description: "এখনো কোনো নথি নেই।" } };
+    }
     if (safeSpace !== "ionic-tutorial") {
       const item = mockTutorialSpaces.items.find((candidate) => candidate.slug === safeSpace);
       return { ...mockTutorialSpace, space: { ...mockTutorialSpace.space, slug: safeSpace, title: item?.title ?? safeSpace } };
@@ -136,6 +140,12 @@ export async function getTutorialPage(slug?: string, space?: string): Promise<Tu
   const safeSlug = slug?.trim();
   if (!safeSlug) {
     const spacePayload = await getTutorialSpace(space);
+    if (!spacePayload.default_article_slug) {
+      // The space is published but has no published content yet (e.g. its
+      // articles were not imported or are all drafts). Render a friendly
+      // empty state instead of crashing on a missing default article.
+      throw new TutorialApiError("SPACE_EMPTY", `এই space-এ এখনো কোনো প্রকাশিত নথি নেই`);
+    }
     return getTutorialPage(spacePayload.default_article_slug, space);
   }
   const safeSpace = space?.trim() || config.tutorialSpace;
