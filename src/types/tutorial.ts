@@ -9,6 +9,7 @@ export interface TutorialSpaceSettings {
   readonly discuss_url?: string;
   readonly website_url?: string;
   readonly github_url?: string;
+  readonly source_base_url?: string;
   readonly attribution_text?: string;
 }
 

@@ -70,6 +70,7 @@ function parseSpaceSettings(value: unknown): TutorialSpaceSettings {
     discuss_url: stringField(value, "discuss_url", false),
     website_url: stringField(value, "website_url", false),
     github_url: stringField(value, "github_url", false),
+    source_base_url: stringField(value, "source_base_url", false),
     attribution_text: stringField(value, "attribution_text", false),
   };
 }

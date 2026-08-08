@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { FiCheck, FiChevronDown, FiChevronRight, FiGithub, FiMenu, FiMoon, FiSearch, FiSun, FiX } from "react-icons/fi";
+import { FiCheck, FiChevronDown, FiChevronRight, FiEdit3, FiGithub, FiMenu, FiMoon, FiSearch, FiSun, FiX } from "react-icons/fi";
 import styles from "./tutorial.module.css";
-import type { TutorialAdjacentArticle, TutorialNavigationArticle, TutorialNavigationCategory, TutorialPagePayload, TutorialSpaceSettings, TutorialTocItem } from "@/types/tutorial";
+import type { TutorialAdjacentArticle, TutorialArticle, TutorialNavigationArticle, TutorialNavigationCategory, TutorialPagePayload, TutorialSpaceSettings, TutorialTocItem } from "@/types/tutorial";
 
 type TutorialPageProps = Readonly<{
   payload: TutorialPagePayload;
@@ -302,12 +302,24 @@ export function TutorialFeedback() {
   return <div className={styles.feedback}><span>{value ? "Thanks for the feedback." : "Was this helpful?"}</span><div><button type="button" aria-label="Helpful" onClick={() => setValue("yes")}>Yes</button><button type="button" aria-label="Not helpful" onClick={() => setValue("no")}>No</button></div></div>;
 }
 
+function editHref(article: TutorialArticle, space: TutorialSpaceSettings): string | null {
+  const source = article.source_url;
+  if (source && /^https?:\/\//i.test(source)) return source;
+  const base = space.source_base_url;
+  if (base && source?.startsWith("content://")) {
+    const path = source.replace(/^content:\/\/[^/]+\//, "");
+    return `${base.replace(/\/+$/, "")}/${path}`;
+  }
+  return space.github_url ?? null;
+}
+
 export function TutorialArticle({ payload, space, defaultSpace }: Readonly<{ payload: TutorialPagePayload; space: string; defaultSpace: string }>) {
   const { article } = payload;
   const coverImage = publicAssetPath(article.cover_image, "");
+  const editUrl = editHref(article, payload.space);
   return (
     <article className={styles.article} aria-labelledby="page-title">
-      <div className={styles.articleToolbar}><h1 id="page-title">{article.title}</h1></div>
+      <div className={styles.articleToolbar}><h1 id="page-title">{article.title}</h1>{editUrl ? <a className={styles.editLink} href={editUrl} target="_blank" rel="noopener noreferrer"><FiEdit3 aria-hidden />Edit</a> : null}</div>
       <div className={styles.rule} />
       {article.summary ? <p>{article.summary}</p> : null}
       {coverImage ? <img className={styles.heroImage} src={coverImage} alt={article.title} /> : null}
