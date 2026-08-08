@@ -167,6 +167,14 @@ export function TutorialThemeToggle({ theme, onToggle }: Readonly<{ theme: Theme
 
 export function TutorialHeader({ payload, spaces, defaultSpace, theme, onToggleTheme, onOpenSearch, onOpenMenu }: Readonly<{ payload: TutorialPagePayload; spaces: TutorialSpaceSettings[] | null; defaultSpace: string; theme: ThemeName; onToggleTheme: () => void; onOpenSearch: () => void; onOpenMenu: () => void }>) {
   const { space } = payload;
+  // Relative learn_url values from older spaces (e.g. "/erp-tutorial/introduction")
+  // point at routes this app does not have, so they 404. Fall back to the space
+  // home (e.g. /tutorial?space=ionic-erp) instead. External URLs are kept as-is.
+  const learnHref = (() => {
+    const safe = safeHref(space.learn_url);
+    if (safe && !isExternalUrl(safe)) return hrefForHome(space.slug, defaultSpace);
+    return safe ?? undefined;
+  })();
   return (
     <header className={styles.topbar} role="banner">
       <TutorialSpaceDropdown current={space} spaces={spaces} defaultSpace={defaultSpace} />
@@ -174,7 +182,7 @@ export function TutorialHeader({ payload, spaces, defaultSpace, theme, onToggleT
         <FiSearch aria-hidden /><span>Search documentation</span><kbd>Ctrl K</kbd>
       </button>
       <nav className={styles.topLinks} aria-label="Community links">
-        <TopLink href={space.learn_url}>Learn</TopLink>
+        <TopLink href={learnHref}>Learn</TopLink>
         <TopLink href={space.discuss_url}>Discuss</TopLink>
         <TopLink href={space.website_url}>Website</TopLink>
         {isSafeHttpUrl(space.github_url) ? <a className={styles.iconLink} href={space.github_url} aria-label="Github" rel="noopener noreferrer" target="_blank"><FiGithub /></a> : null}
