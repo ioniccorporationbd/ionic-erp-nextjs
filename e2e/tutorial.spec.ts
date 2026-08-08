@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 async function openMobileDrawerIfNeeded(page: Page) {
   if (page.viewportSize()!.width <= 767) {
-    await page.getByRole("button", { name: "Open menu" }).click();
+    await page.getByRole("button", { name: "Menu", exact: true }).click();
     await expect(page.getByRole("dialog", { name: "Documentation menu" })).toBeVisible();
   }
 }
@@ -47,7 +47,7 @@ test.describe("Ionic Tutorial API-driven documentation", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Welcome" })).toBeVisible();
     await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
     if (page.viewportSize()!.width <= 767) {
-      await page.getByRole("button", { name: "Open menu" }).click();
+      await page.getByRole("button", { name: "Menu", exact: true }).click();
       await expect(page.getByRole("dialog", { name: "Documentation menu" }).getByRole("navigation", { name: "Documentation navigation" })).toBeVisible();
       await page.keyboard.press("Escape");
     } else {
@@ -103,8 +103,11 @@ test.describe("Ionic Tutorial API-driven documentation", () => {
     await expect(dialog).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(dialog).toHaveCount(0);
-    const searchButtonName = page.viewportSize()!.width <= 767 ? "Open mobile search" : "Open search";
-    await page.getByRole("button", { name: searchButtonName }).click();
+    if (page.viewportSize()!.width > 767) {
+      await page.getByRole("button", { name: "Open search" }).click();
+    } else {
+      await openSearchWithShortcut(page);
+    }
     dialog = page.getByRole("dialog", { name: "Search documentation" });
     await expect(dialog).toBeVisible();
     await page.getByRole("searchbox").fill("runtime");
@@ -114,14 +117,15 @@ test.describe("Ionic Tutorial API-driven documentation", () => {
     await expect(page).toHaveURL(/\/tutorial\/runtime-article$/);
   });
 
-  test("theme switch persists safely and mobile drawer works", async ({ page }) => {
+  test("back to home button redirects home and mobile drawer works", async ({ page }) => {
     await page.goto("/tutorial");
-    await page.getByRole("button", { name: "Toggle theme" }).click();
-    await expect(page.locator(".tutorial-page[data-theme]")).toHaveAttribute("data-theme", "dark");
-    await page.reload();
-    await expect(page.locator(".tutorial-page[data-theme]")).toHaveAttribute("data-theme", "dark");
+    const backHome = page.getByRole("link", { name: "Back to Home" });
+    await expect(backHome).toHaveAttribute("href", "/");
+    await backHome.click();
+    await expect(page).toHaveURL(/\/$/);
     if (page.viewportSize()!.width <= 767) {
-      await page.getByRole("button", { name: "Open menu" }).click();
+      await page.goto("/tutorial");
+      await page.getByRole("button", { name: "Menu", exact: true }).click();
       await expect(page.getByRole("dialog", { name: "Documentation menu" })).toBeVisible();
       await page.keyboard.press("Escape");
       await expect(page.getByRole("dialog", { name: "Documentation menu" })).toHaveCount(0);

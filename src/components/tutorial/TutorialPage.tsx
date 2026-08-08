@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { FiCheck, FiChevronDown, FiChevronRight, FiEdit3, FiGithub, FiMenu, FiMoon, FiSearch, FiSun, FiX } from "react-icons/fi";
+import { FiCheck, FiChevronDown, FiChevronRight, FiEdit3, FiMenu, FiSearch, FiX } from "react-icons/fi";
 import styles from "./tutorial.module.css";
 import type { TutorialAdjacentArticle, TutorialArticle, TutorialNavigationArticle, TutorialNavigationCategory, TutorialPagePayload, TutorialSpaceSettings, TutorialTocItem } from "@/types/tutorial";
 
@@ -12,9 +12,7 @@ type TutorialPageProps = Readonly<{
   defaultSpace?: string;
 }>;
 type SearchRow = TutorialNavigationArticle & Readonly<{ category: string }>;
-type ThemeName = "light" | "dark";
 
-const THEME_STORAGE_KEY = "ionic-tutorial-theme";
 const TUTORIAL_LINK_PREFETCH = false;
 const DEFAULT_SPACE_SLUG = "ionic-tutorial";
 const SEARCH_PAGE_SIZE = 8;
@@ -160,41 +158,15 @@ export function TutorialSpaceDropdown({ current, spaces, defaultSpace }: Readonl
   );
 }
 
-function TopLink({ href, children }: Readonly<{ href?: string; children: ReactNode }>) {
-  const safe = safeHref(href);
-  if (!safe) return null;
-  return <a href={safe} rel={isExternalUrl(safe) ? "noopener noreferrer" : undefined} target={isExternalUrl(safe) ? "_blank" : undefined}>{children}</a>;
-}
-
-export function TutorialThemeToggle({ theme, onToggle }: Readonly<{ theme: ThemeName; onToggle: () => void }>) {
-  return <button className={styles.iconButton} type="button" aria-label="Toggle theme" aria-pressed={theme === "dark"} onClick={onToggle}>{theme === "dark" ? <FiSun /> : <FiMoon />}</button>;
-}
-
-export function TutorialHeader({ payload, spaces, defaultSpace, theme, onToggleTheme, onOpenSearch, onOpenMenu }: Readonly<{ payload: TutorialPagePayload; spaces: TutorialSpaceSettings[] | null; defaultSpace: string; theme: ThemeName; onToggleTheme: () => void; onOpenSearch: () => void; onOpenMenu: () => void }>) {
+export function TutorialHeader({ payload, spaces, defaultSpace, onOpenSearch }: Readonly<{ payload: TutorialPagePayload; spaces: TutorialSpaceSettings[] | null; defaultSpace: string; onOpenSearch: () => void }>) {
   const { space } = payload;
-  // Relative learn_url values from older spaces (e.g. "/erp-tutorial/introduction")
-  // point at routes this app does not have, so they 404. Fall back to the space
-  // home (e.g. /tutorial?space=ionic-erp) instead. External URLs are kept as-is.
-  const learnHref = (() => {
-    const safe = safeHref(space.learn_url);
-    if (safe && !isExternalUrl(safe)) return hrefForHome(space.slug, defaultSpace);
-    return safe ?? undefined;
-  })();
   return (
     <header className={styles.topbar} role="banner">
       <TutorialSpaceDropdown current={space} spaces={spaces} defaultSpace={defaultSpace} />
       <button type="button" className={styles.desktopSearch} aria-label="Open search" onClick={onOpenSearch}>
         <FiSearch aria-hidden /><span>Search documentation</span><kbd>Ctrl K</kbd>
       </button>
-      <nav className={styles.topLinks} aria-label="Community links">
-        <TopLink href={learnHref}>Learn</TopLink>
-        <TopLink href={space.discuss_url}>Discuss</TopLink>
-        <TopLink href={space.website_url}>Website</TopLink>
-        {isSafeHttpUrl(space.github_url) ? <a className={styles.iconLink} href={space.github_url} aria-label="Github" rel="noopener noreferrer" target="_blank"><FiGithub /></a> : null}
-        <TutorialThemeToggle theme={theme} onToggle={onToggleTheme} />
-        <button className={styles.mobileSearch} type="button" aria-label="Open mobile search" onClick={onOpenSearch}><FiSearch /></button>
-        <button className={styles.mobileMenuButton} type="button" aria-label="Open menu" onClick={onOpenMenu}><FiMenu /></button>
-      </nav>
+      <Link className={styles.backHome} href="/" prefetch={TUTORIAL_LINK_PREFETCH}>Back to Home</Link>
     </header>
   );
 }
@@ -403,14 +375,8 @@ export function TutorialShell({ payload, spaces = null, defaultSpace = DEFAULT_S
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeId, setActiveId] = useState(payload.table_of_contents[0]?.id);
-  const [theme, setTheme] = useState<ThemeName>("light");
   const searchRows = useMemo(() => allSearchRows(payload.navigation), [payload.navigation]);
   const space = payload.space.slug;
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-    if (stored === "dark" || stored === "light") window.setTimeout(() => setTheme(stored), 0);
-  }, []);
 
   useEffect(() => {
     const handler = (event: globalThis.KeyboardEvent) => {
@@ -430,17 +396,9 @@ export function TutorialShell({ payload, spaces = null, defaultSpace = DEFAULT_S
     return () => observer.disconnect();
   }, [payload.table_of_contents]);
 
-  function toggleTheme() {
-    setTheme((current) => {
-      const next = current === "dark" ? "light" : "dark";
-      localStorage.setItem(THEME_STORAGE_KEY, next);
-      return next;
-    });
-  }
-
   return (
-    <div className={`tutorial-page ${styles.page}`} data-theme={theme} lang="en">
-      <TutorialHeader payload={payload} spaces={spaces} defaultSpace={defaultSpace} theme={theme} onToggleTheme={toggleTheme} onOpenSearch={() => setSearchOpen(true)} onOpenMenu={() => setMobileMenuOpen(true)} />
+    <div className={`tutorial-page ${styles.page}`} data-theme="light" lang="en">
+      <TutorialHeader payload={payload} spaces={spaces} defaultSpace={defaultSpace} onOpenSearch={() => setSearchOpen(true)} />
       <div className={styles.shell}>
         <aside className={styles.sidebar}><TutorialSidebar navigation={payload.navigation} activeSlug={payload.article.slug} space={space} defaultSpace={defaultSpace} /></aside>
         <div className={styles.main}><TutorialArticle payload={payload} space={space} defaultSpace={defaultSpace} /></div>

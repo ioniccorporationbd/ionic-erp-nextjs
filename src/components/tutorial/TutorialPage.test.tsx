@@ -48,7 +48,7 @@ const payload: TutorialPagePayload = {
 };
 
 describe("TutorialPage Frappe-style shell", () => {
-  it("renders API-driven navigation, safe markdown, search, pager, and theme interactions", async () => {
+  it("renders API-driven navigation, safe markdown, search, pager, and back-to-home link", async () => {
     const user = userEvent.setup();
     const writeText = vi.fn();
     Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
@@ -78,8 +78,8 @@ describe("TutorialPage Frappe-style shell", () => {
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog", { name: "Search documentation" })).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Toggle theme" }));
-    expect(localStorage.getItem("ionic-tutorial-theme")).toBe("dark");
+    expect(screen.getByRole("link", { name: "Back to Home" })).toHaveAttribute("href", "/");
+    expect(screen.queryByRole("button", { name: "Toggle theme" })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Copy link to Install" }));
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining("#install"));
