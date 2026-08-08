@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -153,5 +153,36 @@ describe("TutorialPage Frappe-style shell", () => {
     await user.clear(searchbox);
     await user.type(searchbox, "zzz-no-match");
     expect(within(dialog).getByText(/No results for/)).toBeInTheDocument();
+  });
+
+  it("hides the brand logo in the header when it fails to load", () => {
+    render(<TutorialPage payload={payload} />);
+    const brand = screen.getByRole("button", { name: "Ionic Tutorial — choose tutorial space" });
+    const brandImg = brand.querySelector("img");
+    expect(brandImg).not.toBeNull();
+    fireEvent.error(brandImg as HTMLImageElement);
+    expect(brandImg).toHaveStyle({ display: "none" });
+  });
+
+  it("hides a broken space logo in the dropdown instead of showing a broken-image icon", async () => {
+    const user = userEvent.setup();
+    const spaces = [
+      { title: "Ionic Tutorial", slug: "ionic-tutorial", route_prefix: "/tutorial" },
+      {
+        title: "Ionic POS",
+        slug: "ionic-pos",
+        route_prefix: "/tutorial",
+        short_description: "Point of sale docs",
+        logo: "/assets/ionic_tutorial/content/spaces/ionic-pos/assets/logo.svg",
+      },
+    ];
+    render(<TutorialPage payload={payload} spaces={spaces} defaultSpace="ionic-tutorial" />);
+    await user.click(screen.getByRole("button", { name: "Ionic Tutorial — choose tutorial space" }));
+    const posOption = screen.getByRole("option", { name: /Ionic POS/ });
+    const posImg = posOption.querySelector("img");
+    expect(posImg).not.toBeNull();
+    expect(posImg).toHaveAttribute("src", "/assets/ionic_tutorial/content/spaces/ionic-pos/assets/logo.svg");
+    fireEvent.error(posImg as HTMLImageElement);
+    expect(posImg).toHaveStyle({ display: "none" });
   });
 });

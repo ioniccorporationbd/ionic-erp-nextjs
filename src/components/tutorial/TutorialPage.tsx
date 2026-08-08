@@ -55,6 +55,11 @@ function publicAssetPath(value: string | undefined, fallback: string): string {
   return safeHref(value) ?? fallback;
 }
 
+/** Hide a broken space logo instead of showing the browser's broken-image icon. */
+function hideOnError(event: { currentTarget: HTMLImageElement }): void {
+  event.currentTarget.style.display = "none";
+}
+
 function slugifyHeading(text: string): string {
   return text.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "section";
 }
@@ -128,7 +133,7 @@ export function TutorialSpaceDropdown({ current, spaces, defaultSpace }: Readonl
   return (
     <div className={styles.spaceDropdown} ref={rootRef}>
       <button type="button" className={styles.brand} aria-haspopup="listbox" aria-expanded={open} aria-label={`${current.title} — choose tutorial space`} onClick={() => setOpen((isOpen) => !isOpen)}>
-        <img src={logo} width={24} height={24} alt="" />
+        <img src={logo} width={24} height={24} alt="" onError={hideOnError} />
         <span>{current.title}</span>
         <FiChevronDown className={open ? `${styles.brandChevron} ${styles.brandChevronOpen}` : styles.brandChevron} aria-hidden />
       </button>
@@ -139,7 +144,7 @@ export function TutorialSpaceDropdown({ current, spaces, defaultSpace }: Readonl
             return (
               <li key={item.slug} role="option" aria-selected={isCurrent} aria-current={isCurrent ? "true" : undefined}>
                 <Link className={isCurrent ? styles.spaceMenuItemCurrent : styles.spaceMenuItem} href={hrefForHome(item.slug, defaultSpace)} onClick={() => setOpen(false)} prefetch={TUTORIAL_LINK_PREFETCH}>
-                  {item.logo ? <img className={styles.spaceMenuLogo} src={publicAssetPath(item.logo, "")} width={20} height={20} alt="" /> : null}
+                  {item.logo ? <img className={styles.spaceMenuLogo} src={publicAssetPath(item.logo, "")} width={20} height={20} alt="" onError={hideOnError} /> : null}
                   <span className={styles.spaceMenuText}>
                     <strong>{item.title}</strong>
                     {item.short_description ? <small>{item.short_description}</small> : null}
