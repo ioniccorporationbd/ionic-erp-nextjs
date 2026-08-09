@@ -13,7 +13,7 @@ describe("public route registry", () => {
       "/lone-management-ionic-erp",
       "/agriculture-ionic-erp",
       "/all-services-ionic-erp",
-      "/tutorial",
+      "/tutorial?space=ionic-erp",
     ]);
   });
 
