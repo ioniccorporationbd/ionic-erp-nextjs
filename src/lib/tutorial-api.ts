@@ -107,6 +107,7 @@ function normalizePageAssets(payload: TutorialPagePayload, frappeBaseUrl: string
         ...block,
         image: withFrappeAssetBase(block.image, frappeBaseUrl),
         video_url: withFrappeAssetBase(block.video_url, frappeBaseUrl),
+        attachment: withFrappeAssetBase(block.attachment, frappeBaseUrl),
       })),
     },
   };

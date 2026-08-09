@@ -103,6 +103,8 @@ describe("TutorialPage Frappe-style shell", () => {
           {
             block_type: "Heading",
             title: "Getting Started",
+            subtitle: "Follow the guide",
+            description: "Start here for a quick tour.",
           },
           {
             block_type: "Markdown",
@@ -113,6 +115,7 @@ describe("TutorialPage Frappe-style shell", () => {
             image: "https://example.com/a.png",
             image_alt: "Getting Started",
             caption: "Setup screen",
+            attachment: "https://example.com/guide.pdf",
           },
           {
             block_type: "Video",
@@ -130,6 +133,7 @@ describe("TutorialPage Frappe-style shell", () => {
           {
             block_type: "Callout",
             title: "Heads up",
+            description: "Callout extra note.",
             content: "Callout note.",
           },
           {
@@ -139,6 +143,7 @@ describe("TutorialPage Frappe-style shell", () => {
             block_type: "Image",
             image: "javascript:alert(1)",
             image_alt: "Unsafe Section",
+            attachment: "javascript:alert(2)",
           },
           {
             block_type: "Video",
@@ -177,6 +182,13 @@ describe("TutorialPage Frappe-style shell", () => {
     // Unsafe block URLs are dropped entirely
     expect(screen.queryByAltText("Unsafe Section")).not.toBeInTheDocument();
     expect(screen.queryByTitle("Unsafe video")).not.toBeInTheDocument();
+
+    // Subtitle and description render under the block title; attachment becomes a download link
+    expect(screen.getByText("Follow the guide")).toBeInTheDocument();
+    expect(screen.getByText("Start here for a quick tour.")).toBeInTheDocument();
+    expect(screen.getByText("Callout extra note.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Download guide.pdf" })).toHaveAttribute("href", "https://example.com/guide.pdf");
+    expect(screen.getAllByRole("link", { name: /Download/ })).toHaveLength(1);
   });
 
   it("renders an accessible space dropdown with the current space highlighted and ?space= links", async () => {

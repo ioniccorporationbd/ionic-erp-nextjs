@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, type ReactNode } from "react";
+import { Fragment, useMemo, type ReactNode } from "react";
 import type { TutorialContentBlock } from "@/types/tutorial";
 import styles from "./tutorial.module.css";
 
@@ -172,6 +172,31 @@ function blockAlignClass(block: TutorialContentBlock): string {
   }
 }
 
+/** Optional subtitle (muted line under the block title) and description (muted lead text). */
+function BlockTextualExtras({ block }: Readonly<{ block: TutorialContentBlock }>) {
+  const subtitle = block.subtitle?.trim();
+  const description = block.description?.trim();
+  if (!subtitle && !description) return null;
+  return (
+    <>
+      {subtitle ? <p className={styles.blockSubtitle}>{subtitle}</p> : null}
+      {description ? <p className={styles.blockDescription}>{description}</p> : null}
+    </>
+  );
+}
+
+/** Optional downloadable file link for the block (unsafe URLs are dropped entirely). */
+function BlockAttachment({ block }: Readonly<{ block: TutorialContentBlock }>) {
+  const href = safeHref(block.attachment);
+  if (!href) return null;
+  const name = decodeURIComponent(href.split("?")[0].split("#")[0].split("/").filter(Boolean).pop() || "attachment");
+  return (
+    <p className={styles.blockAttachment}>
+      <a href={href} rel={isExternalUrl(href) ? "noopener noreferrer" : undefined} target={isExternalUrl(href) ? "_blank" : undefined}>Download {name}</a>
+    </p>
+  );
+}
+
 export function TutorialBlockRenderer({ blocks, space, defaultSpace }: Readonly<{ blocks: readonly TutorialContentBlock[]; space: string; defaultSpace: string }>) {
   return (
     <>
@@ -185,17 +210,22 @@ export function TutorialBlockRenderer({ blocks, space, defaultSpace }: Readonly<
             if (!title) return null;
             const id = slugifyHeading(title);
             return (
-              <h2 id={id} key={key} className={`${styles.blockHeading} ${widthClass}`}>
-                <button className={styles.headingLink} type="button" aria-label={`Copy link to ${title}`} onClick={() => void copyHeadingLink(id)}>#</button>
-                {title}
-              </h2>
+              <Fragment key={key}>
+                <h2 id={id} className={`${styles.blockHeading} ${widthClass}`}>
+                  <button className={styles.headingLink} type="button" aria-label={`Copy link to ${title}`} onClick={() => void copyHeadingLink(id)}>#</button>
+                  {title}
+                </h2>
+                <BlockTextualExtras block={block} />
+              </Fragment>
             );
           }
           case "Markdown": {
-            if (!block.content?.trim()) return null;
+            if (!block.content?.trim() && !block.attachment?.trim()) return null;
             return (
               <div key={key} className={`${styles.blockMarkdown} ${widthClass}`}>
-                <MarkdownText markdown={block.content} space={space} defaultSpace={defaultSpace} />
+                <BlockTextualExtras block={block} />
+                {block.content?.trim() ? <MarkdownText markdown={block.content} space={space} defaultSpace={defaultSpace} /> : null}
+                <BlockAttachment block={block} />
               </div>
             );
           }
@@ -207,6 +237,8 @@ export function TutorialBlockRenderer({ blocks, space, defaultSpace }: Readonly<
               <figure key={key} className={`${styles.blockImage} ${alignClass}`}>
                 <img src={image} alt={alt} loading="lazy" onError={hideOnError} />
                 {block.caption?.trim() ? <figcaption>{block.caption.trim()}</figcaption> : null}
+                <BlockTextualExtras block={block} />
+                <BlockAttachment block={block} />
               </figure>
             );
           }
@@ -224,6 +256,8 @@ export function TutorialBlockRenderer({ blocks, space, defaultSpace }: Readonly<
                   allowFullScreen
                 />
                 {block.caption?.trim() ? <p className={styles.blockVideoCaption}>{block.caption.trim()}</p> : null}
+                <BlockTextualExtras block={block} />
+                <BlockAttachment block={block} />
               </div>
             );
           }
@@ -237,7 +271,9 @@ export function TutorialBlockRenderer({ blocks, space, defaultSpace }: Readonly<
                 <img src={image} alt={alt} loading="lazy" onError={hideOnError} />
                 <div className={styles.imageTextBody}>
                   {block.title?.trim() ? <h3 className={styles.imageTextTitle}>{block.title.trim()}</h3> : null}
+                  <BlockTextualExtras block={block} />
                   {block.content?.trim() ? <MarkdownText markdown={block.content} space={space} defaultSpace={defaultSpace} /> : null}
+                  <BlockAttachment block={block} />
                 </div>
               </div>
             );
@@ -247,7 +283,9 @@ export function TutorialBlockRenderer({ blocks, space, defaultSpace }: Readonly<
             return (
               <aside key={key} className={`${styles.callout} ${alignClass}`}>
                 {block.title?.trim() ? <strong className={styles.calloutTitle}>{block.title.trim()}</strong> : null}
+                <BlockTextualExtras block={block} />
                 <MarkdownText markdown={block.content} space={space} defaultSpace={defaultSpace} />
+                <BlockAttachment block={block} />
               </aside>
             );
           }

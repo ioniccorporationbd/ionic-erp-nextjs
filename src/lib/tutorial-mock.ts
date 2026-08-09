@@ -142,6 +142,8 @@ export const mockTutorialPages: Record<string, TutorialPagePayload> = {
         {
           block_type: "Heading",
           title: "Code block",
+          subtitle: "Run the migration steps",
+          description: "A deterministic sequence of commands.",
         },
         {
           block_type: "Markdown",
@@ -166,6 +168,7 @@ export const mockTutorialPages: Record<string, TutorialPagePayload> = {
         {
           block_type: "Callout",
           title: "Heads up",
+          description: "Markdown formatting works inside callouts.",
           content: "Callout blocks render **markdown** with a distinct background.",
         },
         {
@@ -176,6 +179,7 @@ export const mockTutorialPages: Record<string, TutorialPagePayload> = {
           image: "/assets/tutorial/screenshot-captured.png",
           image_alt: "Captured tutorial screen",
           caption: "A captured screen",
+          attachment: "/assets/tutorial/sample-guide.pdf",
         },
         {
           block_type: "Video",
@@ -186,6 +190,7 @@ export const mockTutorialPages: Record<string, TutorialPagePayload> = {
         {
           block_type: "Image Text",
           title: "Side by side",
+          subtitle: "Image right layout",
           image: "/assets/tutorial/frappe-hr-logo.png",
           image_alt: "Frappe HR logo",
           content: "An image text block pairs media with prose and wraps on small screens.",

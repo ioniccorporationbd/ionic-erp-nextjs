@@ -35,11 +35,14 @@ export type TutorialBlockType = "Heading" | "Markdown" | "Image" | "Video" | "Im
 export interface TutorialContentBlock {
   readonly block_type: TutorialBlockType;
   readonly title?: string;
+  readonly subtitle?: string;
+  readonly description?: string;
   readonly content?: string;
   readonly image?: string;
   readonly image_alt?: string;
   readonly caption?: string;
   readonly video_url?: string;
+  readonly attachment?: string;
   readonly layout?: "image-left" | "image-right" | "image-above";
   readonly width?: "full" | "wide" | "normal";
   readonly alignment?: "left" | "center" | "right";

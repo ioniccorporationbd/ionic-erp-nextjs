@@ -91,12 +91,13 @@ describe("Ionic Tutorial API client", () => {
         article: {
           ...validPagePayload.message.article,
           content_blocks: [
-            { block_type: "Heading", title: "Getting Started" },
+            { block_type: "Heading", title: "Getting Started", subtitle: "Follow the guide", description: "A quick tour" },
             {
               block_type: "Markdown",
               content: "Body text",
               image: "javascript:alert(1)",
               video_url: "",
+              attachment: "/files/guide.pdf",
             },
           ],
         },
@@ -109,9 +110,12 @@ describe("Ionic Tutorial API client", () => {
     expect(payload.article.content_blocks).toHaveLength(2);
     expect(payload.article.content_blocks?.[0].block_type).toBe("Heading");
     expect(payload.article.content_blocks?.[0].title).toBe("Getting Started");
+    expect(payload.article.content_blocks?.[0].subtitle).toBe("Follow the guide");
+    expect(payload.article.content_blocks?.[0].description).toBe("A quick tour");
     expect(payload.article.content_blocks?.[1].content).toBe("Body text");
     expect(payload.article.content_blocks?.[1].image).toBe("javascript:alert(1)");
     expect(payload.article.content_blocks?.[1].video_url).toBe("");
+    expect(payload.article.content_blocks?.[1].attachment).toBe("https://next.ionicerp.xyz/files/guide.pdf");
   });
 
   it("rejects an article whose content_blocks contain a malformed row", async () => {
