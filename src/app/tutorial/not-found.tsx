@@ -3,7 +3,7 @@ import styles from "@/components/tutorial/tutorial.module.css";
 
 export default function TutorialNotFound() {
   return (
-    <div className={`tutorial-page ${styles.page}`} lang="en">
+    <div className={`tutorial-page ${styles.page}`}>
       <main className={styles.main}>
         <article className={styles.article}>
           <div className={styles.articleToolbar}><h1>Tutorial page not found</h1></div>

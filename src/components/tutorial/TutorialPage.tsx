@@ -368,7 +368,7 @@ export function TutorialMobileDrawer({ open, navigation, activeSlug, space, defa
 }
 
 export function TutorialErrorState({ title = "Tutorial unavailable", message = "Please try again later." }: Readonly<{ title?: string; message?: string }>) {
-  return <main className={styles.errorState} lang="en"><h1>{title}</h1><p>{message}</p><Link href="/tutorial" prefetch={TUTORIAL_LINK_PREFETCH}>Back to tutorial home</Link></main>;
+  return <main className={styles.errorState}><h1>{title}</h1><p>{message}</p><Link href="/tutorial" prefetch={TUTORIAL_LINK_PREFETCH}>Back to tutorial home</Link></main>;
 }
 
 export function TutorialShell({ payload, spaces = null, defaultSpace = DEFAULT_SPACE_SLUG }: TutorialPageProps) {
@@ -397,7 +397,7 @@ export function TutorialShell({ payload, spaces = null, defaultSpace = DEFAULT_S
   }, [payload.table_of_contents]);
 
   return (
-    <div className={`tutorial-page ${styles.page}`} data-theme="light" lang="en">
+    <div className={`tutorial-page ${styles.page}`} data-theme="light">
       <TutorialHeader payload={payload} spaces={spaces} defaultSpace={defaultSpace} onOpenSearch={() => setSearchOpen(true)} />
       <div className={styles.shell}>
         <aside className={styles.sidebar}><TutorialSidebar navigation={payload.navigation} activeSlug={payload.article.slug} space={space} defaultSpace={defaultSpace} /></aside>

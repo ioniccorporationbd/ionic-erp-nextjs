@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   },
   description:
     "ব্যবসা পরিচালনার জন্য টোটাল সলুয়েশন আইওনিক ইআরপি বিজনেস ম্যানেজমেন্ট সফটওয়্যার।",
+  other: {
+    google: "notranslate",
+  },
   icons: {
     icon: "/assets/erp/ionic-erp-logo.png",
   },

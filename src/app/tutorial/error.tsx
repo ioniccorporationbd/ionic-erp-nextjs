@@ -8,7 +8,7 @@ export default function TutorialError({ error, reset }: Readonly<{ error: Error;
     console.error("Tutorial page error boundary:", error);
   }, [error]);
   return (
-    <div className={`tutorial-page ${styles.page}`} lang="en">
+    <div className={`tutorial-page ${styles.page}`}>
       <main className={styles.main}>
         <article className={styles.article}>
           <div className={styles.articleToolbar}><h1>Unable to load tutorial</h1></div>
