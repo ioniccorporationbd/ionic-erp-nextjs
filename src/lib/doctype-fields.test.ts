@@ -41,24 +41,20 @@ describe("DOCTYPE_FIELDS registry", () => {
     expect(DOCTYPE_FIELDS.category).toHaveLength(6);
   });
 
-  it("mirrors the backend Ionic Tutorial Article DocType (14 fields)", () => {
+  it("shows the curated Ionic Tutorial Article field set (10 visible fields)", () => {
     expect(DOCTYPE_FIELDS.article.map((f) => f.fieldname)).toEqual([
-      "title",
       "slug",
       "space",
       "category",
-      "summary",
       "body_markdown",
-      "cover_image",
       "seo_title",
-      "seo_description",
       "source_url",
       "source_hash",
       "source_updated_at",
       "sort_order",
       "published",
     ]);
-    expect(DOCTYPE_FIELDS.article).toHaveLength(14);
+    expect(DOCTYPE_FIELDS.article).toHaveLength(10);
   });
 });
 
@@ -101,11 +97,9 @@ describe("buildDocTypeRows", () => {
     const rows = buildDocTypeRows(mockTutorialPages.welcome).article;
     const byName = Object.fromEntries(rows.map((row) => [row.fieldname, row]));
 
-    expect(byName.title.value).toBe("Welcome");
     expect(byName.slug.value).toBe("welcome");
     expect(byName.space.value).toBe("ionic-tutorial");
     expect(byName.category.value).toBe("getting-started");
-    expect(byName.summary.value).toContain("mock welcome article");
     expect(byName.body_markdown.kind).toBe("markdown");
     expect(byName.body_markdown.value).toContain("Welcome");
     expect(byName.seo_title.value).toBe("Welcome to Ionic Tutorial");
@@ -113,7 +107,6 @@ describe("buildDocTypeRows", () => {
     expect(byName.source_updated_at.value).toBe("2026-08-02 00:00:00");
     expect(byName.sort_order.value).toBe("1");
     expect(byName.source_hash.present).toBe(false);
-    expect(byName.cover_image.present).toBe(false);
     expect(byName.published.present).toBe(false);
   });
 
@@ -138,11 +131,15 @@ describe("buildDocTypeRows", () => {
     expect(space.sort_order.value).toBe("2");
   });
 
-  it("marks cover_image as an image row when present", () => {
+  it("keeps removed fields out of the article rows (title, summary, cover_image, seo_description)", () => {
     const rows = buildDocTypeRows(mockTutorialPages["long-article"]).article;
-    const cover = rows.find((row) => row.fieldname === "cover_image")!;
-    expect(cover.kind).toBe("image");
-    expect(cover.href).toBe("/assets/erp/erpfixed.png");
+    const fieldnames = rows.map((row) => row.fieldname);
+    expect(fieldnames).not.toContain("title");
+    expect(fieldnames).not.toContain("summary");
+    expect(fieldnames).not.toContain("cover_image");
+    expect(fieldnames).not.toContain("seo_description");
+    // remaining rows still resolve from the payload
+    expect(rows.find((row) => row.fieldname === "slug")?.value).toBe("long-article");
   });
 
   it("leaves Category/Article rows missing when the article has no navigation category", () => {

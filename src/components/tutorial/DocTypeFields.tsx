@@ -5,7 +5,7 @@ import styles from "./tutorial.module.css";
 const GROUPS: ReadonlyArray<{ name: DocTypeName; title: string; caption: string }> = [
   { name: "space", title: "Ionic Tutorial Space", caption: "স্পেস ডকটাইপ — ১৬টি ফিল্ড" },
   { name: "category", title: "Ionic Tutorial Category", caption: "ক্যাটাগরি ডকটাইপ — ৬টি ফিল্ড" },
-  { name: "article", title: "Ionic Tutorial Article", caption: "আর্টিকেল ডকটাইপ — ১৪টি ফিল্ড" },
+  { name: "article", title: "Ionic Tutorial Article", caption: "আর্টিকেল ডকটাইপ — ১০টি ফিল্ড" },
 ];
 
 function FieldValue({ row }: { row: DocTypeFieldRow }) {
@@ -79,10 +79,10 @@ export function DocTypeFields({ payload }: { payload: TutorialPagePayload }) {
       <details className={styles.doctypeDetails}>
         <summary id="doctype-fields-heading" className={styles.doctypeSummary}>
           DocType Fields
-          <span className={styles.doctypeBadge}>৩টি ডকটাইপ · সব ফিল্ড + data</span>
+          <span className={styles.doctypeBadge}>৩টি ডকটাইপ · ফিল্ড + data</span>
         </summary>
         <p className={styles.doctypeIntro}>
-          এই পেজে ব্যবহৃত ৩টি DocType-এর প্রতিটি ফিল্ড ও তার বর্তমান data নিচে দেখানো হলো।
+          এই পেজে ব্যবহৃত ৩টি DocType-এর ফিল্ড ও তার বর্তমান data নিচে দেখানো হলো।
           যে ফিল্ডগুলো public API expose করে না, সেগুলো <strong>“—”</strong> হিসেবে দেখানো হয়েছে।
         </p>
         {GROUPS.map((group) => (
