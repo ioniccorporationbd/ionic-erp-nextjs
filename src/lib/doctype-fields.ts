@@ -57,6 +57,7 @@ export const DOCTYPE_FIELDS: Readonly<Record<DocTypeName, readonly DocTypeFieldD
     { fieldname: "space", label: "Space", type: "Link" },
     { fieldname: "category", label: "Category", type: "Link" },
     { fieldname: "body_markdown", label: "Body Markdown", type: "Markdown Editor" },
+    { fieldname: "body_sections", label: "Body Sections", type: "Table" },
     { fieldname: "seo_title", label: "SEO Title", type: "Data" },
     { fieldname: "source_url", label: "Source URL", type: "Data" },
     { fieldname: "source_hash", label: "Source Hash", type: "Data" },
@@ -183,6 +184,12 @@ function articleValue(
     case "source_updated_at": {
       const value = article[fieldname];
       return typeof value === "string" && value !== "" ? value : undefined;
+    }
+    case "body_sections": {
+      const value = article.body_sections;
+      if (!Array.isArray(value) || value.length === 0) return undefined;
+      const count = value.length;
+      return `${count} ${count === 1 ? "row" : "rows"}`;
     }
     case "sort_order":
       return String(article.sort_order);

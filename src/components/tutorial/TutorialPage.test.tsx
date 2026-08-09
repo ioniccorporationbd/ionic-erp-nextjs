@@ -85,6 +85,61 @@ describe("TutorialPage Frappe-style shell", () => {
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining("#install"));
   });
 
+  it("renders structured Body Sections (child table) when present, skipping the markdown body", () => {
+    const sectionPayload: TutorialPagePayload = {
+      ...payload,
+      article: {
+        ...payload.article,
+        body_sections: [
+          {
+            section_title: "Getting Started",
+            section_subtitle: "First steps",
+            section_image: "https://example.com/a.png",
+            section_video_link: "https://www.youtube.com/watch?v=abc123",
+            section_description: "Install the app and log in.",
+            section_link_title: "Full setup guide",
+            section_link: "https://example.com/setup",
+          },
+          {
+            section_title: "Unsafe Section",
+            section_image: "javascript:alert(1)",
+            section_video_link: "chrome://settings",
+            section_link: "javascript:alert(2)",
+          },
+        ],
+      },
+    };
+    render(<TutorialPage payload={sectionPayload} />);
+
+    // The article title becomes the page h1 when sections are present
+    expect(screen.getByRole("heading", { level: 1, name: "Welcome" })).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(screen.getByRole("heading", { level: 2, name: "Getting Started" })).toBeInTheDocument();
+    expect(screen.getByText("First steps")).toBeInTheDocument();
+    expect(screen.getByText("Install the app and log in.")).toBeInTheDocument();
+
+    // The markdown body is NOT rendered for section-based articles
+    expect(screen.queryByText("bench --site next.ionicerp.xyz migrate")).not.toBeInTheDocument();
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+
+    // Safe image renders lazily; video renders as an external link
+    const image = screen.getByAltText("Getting Started");
+    expect(image).toHaveAttribute("src", "https://example.com/a.png");
+    expect(image).toHaveAttribute("loading", "lazy");
+    const video = screen.getByRole("link", { name: "▶ Watch video" });
+    expect(video).toHaveAttribute("href", "https://www.youtube.com/watch?v=abc123");
+    expect(video).toHaveAttribute("target", "_blank");
+    expect(video).toHaveAttribute("rel", expect.stringContaining("noopener"));
+
+    // Section link renders with its title
+    expect(screen.getByRole("link", { name: "Full setup guide" })).toHaveAttribute("href", "https://example.com/setup");
+
+    // Unsafe section URLs are dropped entirely
+    expect(screen.queryByAltText("Unsafe Section")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Learn more" })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "▶ Watch video" })).toHaveLength(1);
+  });
+
   it("renders an accessible space dropdown with the current space highlighted and ?space= links", async () => {
     const user = userEvent.setup();
     const spaces = [

@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { FiCheck, FiChevronDown, FiChevronRight, FiEdit3, FiMenu, FiSearch, FiX } from "react-icons/fi";
 import { DocTypeFields } from "./DocTypeFields";
 import styles from "./tutorial.module.css";
-import type { TutorialAdjacentArticle, TutorialArticle, TutorialNavigationArticle, TutorialNavigationCategory, TutorialPagePayload, TutorialSpaceSettings, TutorialTocItem } from "@/types/tutorial";
+import type { TutorialAdjacentArticle, TutorialArticle, TutorialArticleSection, TutorialNavigationArticle, TutorialNavigationCategory, TutorialPagePayload, TutorialSpaceSettings, TutorialTocItem } from "@/types/tutorial";
 
 type TutorialPageProps = Readonly<{
   payload: TutorialPagePayload;
@@ -293,14 +293,51 @@ function editHref(article: TutorialArticle, space: TutorialSpaceSettings): strin
   return space.github_url ?? null;
 }
 
+function ArticleSections({ sections, space, defaultSpace }: Readonly<{ sections: readonly TutorialArticleSection[]; space: string; defaultSpace: string }>) {
+  return (
+    <>
+      {sections.map((section, index) => {
+        const image = safeHref(section.section_image);
+        const video = safeHref(section.section_video_link);
+        const link = safeHref(section.section_link);
+        return (
+          <section className={styles.articleSection} key={`${section.section_title || "section"}-${index}`}>
+            {section.section_title ? (
+              <h2 id={slugifyHeading(section.section_title)}>{section.section_title}</h2>
+            ) : null}
+            {section.section_subtitle ? <p className={styles.sectionSubtitle}>{section.section_subtitle}</p> : null}
+            {image ? <img src={image} alt={section.section_title || "Section image"} loading="lazy" /> : null}
+            {video ? (
+              <p className={styles.sectionVideo}>
+                <a href={video} target="_blank" rel="noopener noreferrer">▶ Watch video</a>
+              </p>
+            ) : null}
+            {section.section_description ? <p>{section.section_description}</p> : null}
+            {link ? renderSafeLink(link, section.section_link_title || "Learn more", `section-link-${index}`, space, defaultSpace) : null}
+          </section>
+        );
+      })}
+    </>
+  );
+}
+
 export function TutorialArticle({ payload, space, defaultSpace }: Readonly<{ payload: TutorialPagePayload; space: string; defaultSpace: string }>) {
   const { article } = payload;
   const editUrl = editHref(article, payload.space);
+  const sections = article.body_sections;
+  const hasSections = Array.isArray(sections) && sections.length > 0;
   return (
     <article className={styles.article}>
       {editUrl ? <div className={styles.articleToolbar}><a className={styles.editLink} href={editUrl} target="_blank" rel="noopener noreferrer"><FiEdit3 aria-hidden />Edit</a></div> : null}
       <div className={styles.rule} />
-      <MarkdownArticle markdown={article.body_markdown} space={space} defaultSpace={defaultSpace} />
+      {hasSections ? (
+        <>
+          <h1 id={slugifyHeading(article.title)}>{article.title}</h1>
+          <ArticleSections sections={sections} space={space} defaultSpace={defaultSpace} />
+        </>
+      ) : (
+        <MarkdownArticle markdown={article.body_markdown} space={space} defaultSpace={defaultSpace} />
+      )}
       <TutorialPager previous={payload.previous_article} next={payload.next_article} space={space} defaultSpace={defaultSpace} />
       <TutorialFeedback />
     </article>

@@ -1,6 +1,7 @@
 import type {
   TutorialAdjacentArticle,
   TutorialArticle,
+  TutorialArticleSection,
   TutorialBreadcrumb,
   TutorialNavigationArticle,
   TutorialNavigationCategory,
@@ -49,6 +50,13 @@ function nullableRecord(record: RecordValue, key: string): RecordValue | null {
 
 function arrayField(record: RecordValue, key: string): unknown[] {
   const value = record[key];
+  if (Array.isArray(value)) return value;
+  throw new TutorialApiError("INVALID_PAYLOAD", `Invalid tutorial payload field: ${key}`);
+}
+
+function optionalArrayField(record: RecordValue, key: string): unknown[] | undefined {
+  const value = record[key];
+  if (value == null) return undefined;
   if (Array.isArray(value)) return value;
   throw new TutorialApiError("INVALID_PAYLOAD", `Invalid tutorial payload field: ${key}`);
 }
@@ -105,6 +113,19 @@ function parseNavCategory(value: unknown): TutorialNavigationCategory {
   };
 }
 
+function parseArticleSection(value: unknown): TutorialArticleSection {
+  if (!isRecord(value)) throw new TutorialApiError("INVALID_PAYLOAD", "Invalid tutorial article section");
+  return {
+    section_title: stringField(value, "section_title", false),
+    section_subtitle: stringField(value, "section_subtitle", false),
+    section_image: stringField(value, "section_image", false),
+    section_video_link: stringField(value, "section_video_link", false),
+    section_description: stringField(value, "section_description", false),
+    section_link_title: stringField(value, "section_link_title", false),
+    section_link: stringField(value, "section_link", false),
+  };
+}
+
 function parseArticle(value: unknown): TutorialArticle {
   if (!isRecord(value)) throw new TutorialApiError("INVALID_PAYLOAD", "Invalid tutorial article");
   return {
@@ -112,6 +133,7 @@ function parseArticle(value: unknown): TutorialArticle {
     slug: stringField(value, "slug")!,
     summary: stringField(value, "summary", false),
     body_markdown: stringField(value, "body_markdown")!,
+    body_sections: optionalArrayField(value, "body_sections")?.map(parseArticleSection),
     cover_image: stringField(value, "cover_image", false),
     seo_title: stringField(value, "seo_title", false),
     seo_description: stringField(value, "seo_description", false),

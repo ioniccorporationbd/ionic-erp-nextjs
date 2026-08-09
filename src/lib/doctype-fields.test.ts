@@ -41,12 +41,13 @@ describe("DOCTYPE_FIELDS registry", () => {
     expect(DOCTYPE_FIELDS.category).toHaveLength(6);
   });
 
-  it("shows the curated Ionic Tutorial Article field set (10 visible fields)", () => {
+  it("shows the curated Ionic Tutorial Article field set (11 visible fields)", () => {
     expect(DOCTYPE_FIELDS.article.map((f) => f.fieldname)).toEqual([
       "slug",
       "space",
       "category",
       "body_markdown",
+      "body_sections",
       "seo_title",
       "source_url",
       "source_hash",
@@ -54,7 +55,7 @@ describe("DOCTYPE_FIELDS registry", () => {
       "sort_order",
       "published",
     ]);
-    expect(DOCTYPE_FIELDS.article).toHaveLength(10);
+    expect(DOCTYPE_FIELDS.article).toHaveLength(11);
   });
 });
 
@@ -108,6 +109,25 @@ describe("buildDocTypeRows", () => {
     expect(byName.sort_order.value).toBe("1");
     expect(byName.source_hash.present).toBe(false);
     expect(byName.published.present).toBe(false);
+    expect(byName.body_sections.present).toBe(false); // no child-table rows in the mock article
+  });
+
+  it("reports Body Sections row count when the article has child-table rows", () => {
+    const payload = {
+      ...mockTutorialPages.welcome,
+      article: {
+        ...mockTutorialPages.welcome.article,
+        body_sections: [
+          { section_title: "Getting Started" },
+          { section_title: "Installation", section_link: "https://example.com/setup" },
+        ],
+      },
+    };
+    const article = Object.fromEntries(buildDocTypeRows(payload).article.map((row) => [row.fieldname, row]));
+
+    expect(article.body_sections.present).toBe(true);
+    expect(article.body_sections.value).toBe("2 rows");
+    expect(article.body_sections.kind).toBe("text");
   });
 
   it("renders an http URL as a clickable link and pretty-prints theme JSON", () => {

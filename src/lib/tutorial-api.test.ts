@@ -83,6 +83,51 @@ describe("Ionic Tutorial API client", () => {
     expect(fetchMock.mock.calls[0][1]?.headers).not.toHaveProperty("authorization");
   });
 
+  it("parses article body_sections (child table rows) when present", async () => {
+    process.env.FRAPPE_BASE_URL = "https://next.ionicerp.xyz";
+    const pagePayload = {
+      message: {
+        ...validPagePayload.message,
+        article: {
+          ...validPagePayload.message.article,
+          body_sections: [
+            { section_title: "Getting Started", section_link: "https://example.com/setup" },
+            {
+              section_title: "Second",
+              section_image: "javascript:alert(1)",
+              section_video_link: "",
+              section_description: "Body text",
+            },
+          ],
+        },
+      },
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(pagePayload)));
+    const api = await loadApi();
+    const payload = await api.getTutorialPage("welcome");
+
+    expect(payload.article.body_sections).toHaveLength(2);
+    expect(payload.article.body_sections?.[0].section_title).toBe("Getting Started");
+    expect(payload.article.body_sections?.[0].section_link).toBe("https://example.com/setup");
+    expect(payload.article.body_sections?.[1].section_description).toBe("Body text");
+    expect(payload.article.body_sections?.[1].section_image).toBe("javascript:alert(1)");
+    expect(payload.article.body_sections?.[1].section_video_link).toBe("");
+  });
+
+  it("rejects an article whose body_sections contain a malformed row", async () => {
+    process.env.FRAPPE_BASE_URL = "https://next.ionicerp.xyz";
+    const bad = {
+      message: {
+        ...validPagePayload.message,
+        article: { ...validPagePayload.message.article, body_sections: ["nope"] },
+      },
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(bad)));
+    const api = await loadApi();
+
+    await expect(api.getTutorialPage("welcome")).rejects.toMatchObject({ code: "INVALID_PAYLOAD" });
+  });
+
   it("rejects malformed payloads instead of rendering incorrect content", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ message: { bad: true } })));
     const api = await loadApi();

@@ -30,11 +30,22 @@ export interface TutorialNavigationCategory {
   readonly articles: readonly TutorialNavigationArticle[];
 }
 
+export interface TutorialArticleSection {
+  readonly section_title?: string;
+  readonly section_subtitle?: string;
+  readonly section_image?: string;
+  readonly section_video_link?: string;
+  readonly section_description?: string;
+  readonly section_link_title?: string;
+  readonly section_link?: string;
+}
+
 export interface TutorialArticle {
   readonly title: string;
   readonly slug: string;
   readonly summary?: string;
   readonly body_markdown: string;
+  readonly body_sections?: readonly TutorialArticleSection[];
   readonly cover_image?: string;
   readonly seo_title?: string;
   readonly seo_description?: string;
