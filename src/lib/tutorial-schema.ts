@@ -1,8 +1,8 @@
 import type {
   TutorialAdjacentArticle,
   TutorialArticle,
-  TutorialArticleSection,
   TutorialBreadcrumb,
+  TutorialContentBlock,
   TutorialNavigationArticle,
   TutorialNavigationCategory,
   TutorialPagePayload,
@@ -113,16 +113,41 @@ function parseNavCategory(value: unknown): TutorialNavigationCategory {
   };
 }
 
-function parseArticleSection(value: unknown): TutorialArticleSection {
-  if (!isRecord(value)) throw new TutorialApiError("INVALID_PAYLOAD", "Invalid tutorial article section");
+function booleanFieldOptional(record: RecordValue, key: string): boolean | number | undefined {
+  const value = record[key];
+  if (value == null) return undefined;
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number" && (value === 0 || value === 1)) return value;
+  throw new TutorialApiError("INVALID_PAYLOAD", `Invalid tutorial payload field: ${key}`);
+}
+
+const BLOCK_TYPES = new Set(["Heading", "Markdown", "Image", "Video", "Image Text", "Callout", "Divider"] as const);
+const IMAGE_TEXT_LAYOUTS = new Set(["image-left", "image-right", "image-above"] as const);
+const BLOCK_WIDTHS = new Set(["full", "wide", "normal"] as const);
+const BLOCK_ALIGNMENTS = new Set(["left", "center", "right"] as const);
+
+function enumField<T extends string>(record: RecordValue, key: string, allowed: ReadonlySet<T>): T | undefined {
+  const value = stringField(record, key, false);
+  if (value === undefined) return undefined;
+  if (allowed.has(value as T)) return value as T;
+  throw new TutorialApiError("INVALID_PAYLOAD", `Invalid tutorial payload field: ${key}`);
+}
+
+function parseContentBlock(value: unknown): TutorialContentBlock {
+  if (!isRecord(value)) throw new TutorialApiError("INVALID_PAYLOAD", "Invalid tutorial content block");
   return {
-    section_title: stringField(value, "section_title", false),
-    section_subtitle: stringField(value, "section_subtitle", false),
-    section_image: stringField(value, "section_image", false),
-    section_video_link: stringField(value, "section_video_link", false),
-    section_description: stringField(value, "section_description", false),
-    section_link_title: stringField(value, "section_link_title", false),
-    section_link: stringField(value, "section_link", false),
+    block_type: enumField(value, "block_type", BLOCK_TYPES)!,
+    title: stringField(value, "title", false),
+    content: stringField(value, "content", false),
+    image: stringField(value, "image", false),
+    image_alt: stringField(value, "image_alt", false),
+    caption: stringField(value, "caption", false),
+    video_url: stringField(value, "video_url", false),
+    layout: enumField(value, "layout", IMAGE_TEXT_LAYOUTS),
+    width: enumField(value, "width", BLOCK_WIDTHS),
+    alignment: enumField(value, "alignment", BLOCK_ALIGNMENTS),
+    config_json: stringField(value, "config_json", false),
+    enabled: booleanFieldOptional(value, "enabled"),
   };
 }
 
@@ -132,13 +157,16 @@ function parseArticle(value: unknown): TutorialArticle {
     title: stringField(value, "title")!,
     slug: stringField(value, "slug")!,
     summary: stringField(value, "summary", false),
-    body_sections: (optionalArrayField(value, "body_sections") ?? []).map(parseArticleSection),
+    content_blocks: (optionalArrayField(value, "content_blocks") ?? []).map(parseContentBlock),
     seo_title: stringField(value, "seo_title", false),
     seo_description: stringField(value, "seo_description", false),
     source_url: stringField(value, "source_url", false),
     source_hash: stringField(value, "source_hash", false),
     source_updated_at: stringField(value, "source_updated_at", false),
     sort_order: numberField(value, "sort_order"),
+    show_sidebar: booleanFieldOptional(value, "show_sidebar"),
+    show_toc: booleanFieldOptional(value, "show_toc"),
+    show_breadcrumb: booleanFieldOptional(value, "show_breadcrumb"),
   };
 }
 

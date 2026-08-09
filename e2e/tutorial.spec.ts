@@ -12,6 +12,14 @@ async function openSearchWithShortcut(page: Page) {
   await page.evaluate(() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true })));
 }
 
+// The long-article mock embeds a YouTube iframe and references a placeholder
+// image that does not exist. Block those requests so screenshots are
+// deterministic (no spinner/error-frame timing races on real network calls).
+async function blockNonDeterministicAssets(page: Page) {
+  await page.route(/\/(youtube\.com|youtu\.be)\//, (route) => route.abort());
+  await page.route("**/screenshot-captured.png", (route) => route.abort());
+}
+
 test.describe("Ionic Tutorial API-driven documentation", () => {
   test.describe.configure({ mode: "serial" });
 
@@ -54,10 +62,13 @@ test.describe("Ionic Tutorial API-driven documentation", () => {
       await expect(page.getByRole("navigation", { name: "Documentation navigation" }).first()).toBeAttached();
     }
     await expect(page.locator("#__next_error__")).toHaveCount(0);
-    await expect(page).toHaveScreenshot(`tutorial-default-${testInfo.project.name}.png`, { fullPage: true, animations: "disabled" });
+    // maxDiffPixelRatio absorbs per-run font anti-aliasing variance on text
+    // rows (measured ~0.2%); real layout/content breaks shift far more pixels.
+    await expect(page).toHaveScreenshot(`tutorial-default-${testInfo.project.name}.png`, { fullPage: true, animations: "disabled", maxDiffPixelRatio: 0.004 });
   });
 
   test("deep article link, long article, code blocks, tables, alerts, external links, and visual baseline", async ({ page }, testInfo) => {
+    await blockNonDeterministicAssets(page);
     await page.goto("/tutorial/long-article");
     await expect(page.getByRole("heading", { level: 1, name: /Long Article/ })).toBeVisible();
     await expect(page.getByText("bench --site next.ionicerp.xyz migrate")).toBeVisible();
@@ -65,7 +76,7 @@ test.describe("Ionic Tutorial API-driven documentation", () => {
     await expect(page.getByText("Alert content for accessibility")).toBeVisible();
     await expect(page.getByRole("link", { name: "External Link" })).toHaveAttribute("rel", /noopener/);
     await expect(page.getByRole("link", { name: "Unsafe Link" })).toHaveCount(0);
-    await expect(page).toHaveScreenshot(`tutorial-long-${testInfo.project.name}.png`, { animations: "disabled" });
+    await expect(page).toHaveScreenshot(`tutorial-long-${testInfo.project.name}.png`, { animations: "disabled", maxDiffPixelRatio: 0.004 });
   });
 
   test("category expansion, previous/next, and new runtime article added after build", async ({ page }) => {

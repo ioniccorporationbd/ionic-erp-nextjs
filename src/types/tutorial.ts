@@ -30,27 +30,37 @@ export interface TutorialNavigationCategory {
   readonly articles: readonly TutorialNavigationArticle[];
 }
 
-export interface TutorialArticleSection {
-  readonly section_title?: string;
-  readonly section_subtitle?: string;
-  readonly section_image?: string;
-  readonly section_video_link?: string;
-  readonly section_description?: string;
-  readonly section_link_title?: string;
-  readonly section_link?: string;
+export type TutorialBlockType = "Heading" | "Markdown" | "Image" | "Video" | "Image Text" | "Callout" | "Divider";
+
+export interface TutorialContentBlock {
+  readonly block_type: TutorialBlockType;
+  readonly title?: string;
+  readonly content?: string;
+  readonly image?: string;
+  readonly image_alt?: string;
+  readonly caption?: string;
+  readonly video_url?: string;
+  readonly layout?: "image-left" | "image-right" | "image-above";
+  readonly width?: "full" | "wide" | "normal";
+  readonly alignment?: "left" | "center" | "right";
+  readonly config_json?: string;
+  readonly enabled?: boolean | number;
 }
 
 export interface TutorialArticle {
   readonly title: string;
   readonly slug: string;
   readonly summary?: string;
-  readonly body_sections: readonly TutorialArticleSection[];
+  readonly content_blocks: readonly TutorialContentBlock[];
   readonly seo_title?: string;
   readonly seo_description?: string;
   readonly source_url?: string;
   readonly source_hash?: string;
   readonly source_updated_at?: string;
   readonly sort_order: number;
+  readonly show_sidebar?: boolean | number;
+  readonly show_toc?: boolean | number;
+  readonly show_breadcrumb?: boolean | number;
 }
 
 export interface TutorialTocItem {

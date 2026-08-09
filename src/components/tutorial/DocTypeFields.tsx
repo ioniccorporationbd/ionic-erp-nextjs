@@ -5,7 +5,7 @@ import styles from "./tutorial.module.css";
 const GROUPS: ReadonlyArray<{ name: DocTypeName; title: string; caption: string }> = [
   { name: "space", title: "Ionic Tutorial Space", caption: "স্পেস ডকটাইপ — ১৬টি ফিল্ড" },
   { name: "category", title: "Ionic Tutorial Category", caption: "ক্যাটাগরি ডকটাইপ — ৬টি ফিল্ড" },
-  { name: "article", title: "Ionic Tutorial Article", caption: "আর্টিকেল ডকটাইপ — ১০টি ফিল্ড" },
+  { name: "article", title: "Ionic Tutorial Article", caption: "আর্টিকেল ডকটাইপ — ১৬টি ফিল্ড" },
 ];
 
 function FieldValue({ row }: { row: DocTypeFieldRow }) {

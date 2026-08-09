@@ -78,8 +78,6 @@
 .article > p, .article section p { margin: 0 0 10px; }
 .heroImage { border: 1px solid #d4d4d4; border-radius: 7px; display: block; height: auto; margin: 16px 0 28px; max-width: 100%; width: 100%; }
 .article section img { border: 1px solid #d4d4d4; border-radius: 7px; display: block; height: auto; margin: 12px 0 16px; max-width: 100%; }
-.sectionSubtitle { color: var(--muted); font-size: 16px; margin: -6px 0 12px; }
-.sectionVideo { font-weight: 500; }
 .article section { scroll-margin-top: 72px; }
 .article h2, .article h3, .article h4 { color: var(--ink); font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; scroll-margin-top: 72px; word-break: break-word; }
 .article h2 { font-size: 19px; margin: 28px 0 10px; }
@@ -98,6 +96,39 @@
 .article pre code { background: transparent; padding: 0; }
 .article blockquote { background: var(--soft); border-left: 3px solid var(--line); border-radius: 0 8px 8px 0; margin: 14px 0 18px; padding: 12px 16px; }
 .tableScroller { margin: 14px 0 18px; overflow-x: auto; }
+/* Content block renderer */
+.blockHeading { margin-top: 32px !important; }
+.blockMarkdown > :first-child { margin-top: 0; }
+.blockMarkdown > :last-child { margin-bottom: 0; }
+.blockImage { margin: 18px 0 22px; max-width: 640px; }
+.blockImage img { border: 1px solid #d4d4d4; border-radius: 7px; display: block; height: auto; max-width: 100%; }
+.blockImage figcaption { color: var(--muted); font-size: 13px; margin-top: 8px; text-align: center; }
+.blockVideo { margin: 18px 0 22px; max-width: 640px; }
+.blockVideo iframe { aspect-ratio: 16 / 9; border: 1px solid #d4d4d4; border-radius: 8px; display: block; height: auto; max-width: 100%; width: 100%; }
+.blockVideoCaption { color: var(--muted); font-size: 13px; margin-top: 8px; text-align: center; }
+.imageText { align-items: center; display: flex; gap: 18px; margin: 18px 0 22px; max-width: 640px; }
+.imageText img { border: 1px solid #d4d4d4; border-radius: 7px; height: auto; max-width: 42%; }
+.imageTextBody { flex: 1; min-width: 0; }
+.imageTextBody > :first-child { margin-top: 0; }
+.imageTextBody > :last-child { margin-bottom: 0; }
+.imageTextTitle { font-size: 17px; margin: 0 0 8px; }
+.imageTextRight { flex-direction: row-reverse; }
+.imageTextAbove { align-items: flex-start; flex-direction: column; }
+.imageTextAbove img { max-width: 100%; width: 100%; }
+.callout { background: var(--soft); border: 1px solid var(--line); border-left: 4px solid var(--link); border-radius: 0 8px 8px 0; margin: 18px 0 22px; max-width: 640px; padding: 12px 16px; }
+.callout > :first-child { margin-top: 0; }
+.callout > :last-child { margin-bottom: 0; }
+.calloutTitle { display: block; margin-bottom: 4px; }
+.divider { border: 0; border-top: 1px solid var(--line); margin: 26px 0; max-width: 640px; }
+.blockWidthFull { max-width: none !important; }
+.blockWidthWide { max-width: 780px !important; }
+.blockAlignCenter { margin-left: auto !important; margin-right: auto !important; text-align: center; }
+.blockAlignRight { margin-left: auto !important; margin-right: 0 !important; }
+@media (max-width: 767px) {
+  .imageText { flex-direction: column; }
+  .imageText img { max-width: 100%; width: 100%; }
+  .imageTextRight { flex-direction: column; }
+}
 .tableScroller table { border-collapse: collapse; min-width: 100%; }
 .tableScroller th, .tableScroller td { border: 1px solid var(--line); color: var(--ink); padding: 9px 11px; text-align: left; vertical-align: top; }
 .tableScroller th { background: var(--soft); font-weight: 600; }

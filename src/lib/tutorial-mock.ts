@@ -73,14 +73,22 @@ const basePage: TutorialPagePayload = {
     title: "Welcome",
     slug: "welcome",
     summary: "Development mock welcome article.",
-    body_sections: [
+    content_blocks: [
       {
-        section_title: "Welcome",
-        section_description: "This development-only mock proves the frontend can render ERP tutorial content.",
+        block_type: "Heading",
+        title: "Welcome",
       },
       {
-        section_title: "Next steps",
-        section_description: "Use the live Frappe API outside tests. [Runtime Article](/tutorial/runtime-article)",
+        block_type: "Markdown",
+        content: "This development-only mock proves the frontend can render ERP tutorial content.",
+      },
+      {
+        block_type: "Heading",
+        title: "Next steps",
+      },
+      {
+        block_type: "Markdown",
+        content: "Use the live Frappe API outside tests. [Runtime Article](/tutorial/runtime-article)",
       },
     ],
     seo_title: "Welcome to Ionic Tutorial",
@@ -107,10 +115,14 @@ export const mockTutorialPages: Record<string, TutorialPagePayload> = {
       ...basePage.article,
       title: "Runtime Article",
       slug: "runtime-article",
-      body_sections: [
+      content_blocks: [
         {
-          section_title: "Runtime heading",
-          section_description: "This page is not generated from static params.\n\nNew runtime content loads without a frontend rebuild.",
+          block_type: "Heading",
+          title: "Runtime heading",
+        },
+        {
+          block_type: "Markdown",
+          content: "This page is not generated from static params.\n\nNew runtime content loads without a frontend rebuild.",
         },
       ],
     },
@@ -126,19 +138,58 @@ export const mockTutorialPages: Record<string, TutorialPagePayload> = {
       title: "Long Article With Code Blocks Tables Alerts Large Images And Very Very Long Titles",
       slug: "long-article",
       summary: "A deterministic article for long content, long navigation, and responsive visual coverage.",
-      body_sections: [
-        { section_description: "LongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLong" },
+      content_blocks: [
         {
-          section_title: "Code block",
-          section_description: "```bash\nbench --site next.ionicerp.xyz migrate\nbench --site next.ionicerp.xyz clear-cache\n```",
+          block_type: "Heading",
+          title: "Code block",
         },
         {
-          section_title: "Table section",
-          section_description: "| Feature | Status |\n| --- | --- |\n| Navigation | API driven |\n| Runtime slugs | Supported |",
+          block_type: "Markdown",
+          content: "```bash\nbench --site next.ionicerp.xyz migrate\nbench --site next.ionicerp.xyz clear-cache\n```",
         },
         {
-          section_title: "Lists and alert",
-          section_description: "- Complete left navigation\n- Keyboard search\n- Mobile drawer\n\n> Alert content for accessibility and wrapping.\n\n[External Link](https://example.com) and [Unsafe Link](javascript:alert(1)).",
+          block_type: "Heading",
+          title: "Table section",
+        },
+        {
+          block_type: "Markdown",
+          content: "| Feature | Status |\n| --- | --- |\n| Navigation | API driven |\n| Runtime slugs | Supported |",
+        },
+        {
+          block_type: "Heading",
+          title: "Lists and alert",
+        },
+        {
+          block_type: "Markdown",
+          content: "- Complete left navigation\n- Keyboard search\n- Mobile drawer\n\n> Alert content for accessibility and wrapping.\n\n[External Link](https://example.com) and [Unsafe Link](javascript:alert(1)).",
+        },
+        {
+          block_type: "Callout",
+          title: "Heads up",
+          content: "Callout blocks render **markdown** with a distinct background.",
+        },
+        {
+          block_type: "Divider",
+        },
+        {
+          block_type: "Image",
+          image: "/assets/tutorial/screenshot-captured.png",
+          image_alt: "Captured tutorial screen",
+          caption: "A captured screen",
+        },
+        {
+          block_type: "Video",
+          title: "Watch the demo",
+          video_url: "https://www.youtube.com/watch?v=abc123def45",
+          caption: "Two-minute walkthrough",
+        },
+        {
+          block_type: "Image Text",
+          title: "Side by side",
+          image: "/assets/tutorial/frappe-hr-logo.png",
+          image_alt: "Frappe HR logo",
+          content: "An image text block pairs media with prose and wraps on small screens.",
+          layout: "image-right",
         },
       ],
       source_updated_at: "2026-08-02 18:37:15.196692",
@@ -159,10 +210,14 @@ export const mockTutorialPages: Record<string, TutorialPagePayload> = {
       ...basePage.article,
       title: "New Article Added After Frontend Build",
       slug: "post-build-article",
-      body_sections: [
+      content_blocks: [
         {
-          section_title: "Post Build",
-          section_description: "This article simulates ERP content added after the frontend build.",
+          block_type: "Heading",
+          title: "Post Build",
+        },
+        {
+          block_type: "Markdown",
+          content: "This article simulates ERP content added after the frontend build.",
         },
       ],
       sort_order: 4,

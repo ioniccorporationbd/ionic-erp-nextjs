@@ -53,11 +53,17 @@ export const DOCTYPE_FIELDS: Readonly<Record<DocTypeName, readonly DocTypeFieldD
     { fieldname: "published", label: "Published", type: "Check" },
   ],
   article: [
+    { fieldname: "title", label: "Title", type: "Data" },
     { fieldname: "slug", label: "Slug", type: "Data" },
     { fieldname: "space", label: "Space", type: "Link" },
     { fieldname: "category", label: "Category", type: "Link" },
-    { fieldname: "body_sections", label: "Body Sections", type: "Table" },
+    { fieldname: "summary", label: "Summary", type: "Small Text" },
+    { fieldname: "content_blocks", label: "Content Blocks", type: "Table" },
     { fieldname: "seo_title", label: "SEO Title", type: "Data" },
+    { fieldname: "seo_description", label: "SEO Description", type: "Small Text" },
+    { fieldname: "show_sidebar", label: "Show Sidebar", type: "Check" },
+    { fieldname: "show_toc", label: "Show Table of Contents", type: "Check" },
+    { fieldname: "show_breadcrumb", label: "Show Breadcrumb", type: "Check" },
     { fieldname: "source_url", label: "Source URL", type: "Data" },
     { fieldname: "source_hash", label: "Source Hash", type: "Data" },
     { fieldname: "source_updated_at", label: "Source Updated At", type: "Datetime" },
@@ -181,11 +187,18 @@ function articleValue(
       const value = article[fieldname];
       return typeof value === "string" && value !== "" ? value : undefined;
     }
-    case "body_sections": {
-      const value = article.body_sections;
+    case "show_sidebar":
+    case "show_toc":
+    case "show_breadcrumb": {
+      const value = article[fieldname];
+      if (value === undefined) return undefined;
+      return String(value);
+    }
+    case "content_blocks": {
+      const value = article.content_blocks;
       if (!Array.isArray(value) || value.length === 0) return undefined;
       const count = value.length;
-      return `${count} ${count === 1 ? "row" : "rows"}`;
+      return `${count} ${count === 1 ? "block" : "blocks"}`;
     }
     case "sort_order":
       return String(article.sort_order);

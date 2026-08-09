@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FiCheck, FiChevronDown, FiChevronRight, FiEdit3, FiMenu, FiSearch, FiX } from "react-icons/fi";
 import { DocTypeFields } from "./DocTypeFields";
+import { TutorialBlockRenderer, hideOnError, safeHref, slugifyHeading } from "./tutorial-blocks";
 import styles from "./tutorial.module.css";
-import type { TutorialAdjacentArticle, TutorialArticle, TutorialArticleSection, TutorialNavigationArticle, TutorialNavigationCategory, TutorialPagePayload, TutorialSpaceSettings, TutorialTocItem } from "@/types/tutorial";
+import type { TutorialAdjacentArticle, TutorialArticle, TutorialNavigationArticle, TutorialNavigationCategory, TutorialPagePayload, TutorialSpaceSettings, TutorialTocItem } from "@/types/tutorial";
 
 type TutorialPageProps = Readonly<{
   payload: TutorialPagePayload;
@@ -29,74 +30,12 @@ function hrefForHome(space?: string | null, defaultSpace?: string | null): strin
   return "/tutorial";
 }
 
-function isSafeHttpUrl(value: string | undefined): value is string {
-  if (!value) return false;
-  if (value.startsWith("/")) return true;
-  try {
-    const url = new URL(value);
-    return url.protocol === "https:" || url.protocol === "http:";
-  } catch {
-    return false;
-  }
-}
-
-function isExternalUrl(value: string): boolean {
-  return /^https?:\/\//i.test(value);
-}
-
-function safeHref(value: string | undefined): string | null {
-  if (!value) return null;
-  if (value.startsWith("#") || value.startsWith("/")) return value;
-  return isSafeHttpUrl(value) ? value : null;
-}
-
 function publicAssetPath(value: string | undefined, fallback: string): string {
   return safeHref(value) ?? fallback;
 }
 
-/** Hide a broken space logo instead of showing the browser's broken-image icon. */
-function hideOnError(event: { currentTarget: HTMLImageElement }): void {
-  event.currentTarget.style.display = "none";
-}
-
-function slugifyHeading(text: string): string {
-  return text.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "section";
-}
-
 function allSearchRows(navigation: readonly TutorialNavigationCategory[]): SearchRow[] {
   return navigation.flatMap((category) => category.articles.map((article) => ({ ...article, category: category.title })));
-}
-
-function renderSafeLink(href: string, children: ReactNode, key: string | undefined, space?: string | null, defaultSpace?: string | null) {
-  const safe = safeHref(href);
-  if (!safe) return <span key={key}>{children}</span>;
-  if (safe.startsWith("/tutorial/")) return <Link href={hrefForSlug(safe.replace(/^\/tutorial\//, "").split("?")[0], space, defaultSpace)} key={key} prefetch={TUTORIAL_LINK_PREFETCH}>{children}</Link>;
-  return <a href={safe} key={key} rel={isExternalUrl(safe) ? "noopener noreferrer" : undefined} target={isExternalUrl(safe) ? "_blank" : undefined}>{children}</a>;
-}
-
-function renderInline(text: string, space?: string | null, defaultSpace?: string | null): ReactNode[] {
-  const nodes: ReactNode[] = [];
-  const pattern = /\[([^\]]+)\]\(([^)]+)\)|`([^`]+)`|\*\*([^*]+)\*\*/g;
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
-  while ((match = pattern.exec(text))) {
-    if (match.index > lastIndex) nodes.push(text.slice(lastIndex, match.index));
-    if (match[1] && match[2]) nodes.push(renderSafeLink(match[2].trim(), match[1], `link-${match.index}`, space, defaultSpace));
-    else if (match[3]) nodes.push(<code key={`code-${match.index}`}>{match[3]}</code>);
-    else if (match[4]) nodes.push(<strong key={`strong-${match.index}`}>{match[4]}</strong>);
-    lastIndex = pattern.lastIndex;
-  }
-  if (lastIndex < text.length) nodes.push(text.slice(lastIndex));
-  return nodes;
-}
-
-function copyHeadingLink(id: string) {
-  const url = `${window.location.origin}${window.location.pathname}#${id}`;
-  try {
-    return Promise.resolve(navigator.clipboard?.writeText(url)).catch(() => undefined);
-  } catch {
-    return Promise.resolve(undefined);
-  }
 }
 
 export function TutorialSpaceDropdown({ current, spaces, defaultSpace }: Readonly<{ current: TutorialSpaceSettings; spaces: TutorialSpaceSettings[] | null; defaultSpace: string }>) {
@@ -193,82 +132,6 @@ export function TutorialSidebar({ navigation, activeSlug, space, defaultSpace, o
   );
 }
 
-function MarkdownText({ markdown, space, defaultSpace }: Readonly<{ markdown: string; space: string; defaultSpace: string }>) {
-  const blocks = useMemo(() => {
-    const lines = markdown.split(/\r?\n/);
-    const result: ReactNode[] = [];
-    let listItems: string[] = [];
-    let orderedItems: string[] = [];
-    let codeLines: string[] = [];
-    let inCode = false;
-
-    function flushList() {
-      if (listItems.length) result.push(<ul key={`ul-${result.length}`}>{listItems.map((item, index) => <li key={`${item}-${index}`}>{renderInline(item, space, defaultSpace)}</li>)}</ul>);
-      if (orderedItems.length) result.push(<ol key={`ol-${result.length}`}>{orderedItems.map((item, index) => <li key={`${item}-${index}`}>{renderInline(item, space, defaultSpace)}</li>)}</ol>);
-      listItems = [];
-      orderedItems = [];
-    }
-    function flushCode() {
-      if (!codeLines.length) return;
-      result.push(<pre key={`pre-${result.length}`}><code>{codeLines.join("\n")}</code></pre>);
-      codeLines = [];
-    }
-    function tryTable(index: number): number {
-      const header = lines[index]?.trim();
-      const separator = lines[index + 1]?.trim();
-      if (!header?.startsWith("|") || !/^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?$/.test(separator || "")) return index;
-      const headers = header.split("|").map((cell) => cell.trim()).filter(Boolean);
-      const rows: string[][] = [];
-      let cursor = index + 2;
-      while (cursor < lines.length && lines[cursor].trim().startsWith("|")) {
-        rows.push(lines[cursor].split("|").map((cell) => cell.trim()).filter(Boolean));
-        cursor += 1;
-      }
-      result.push(<div className={styles.tableScroller} key={`table-${result.length}`}><table><thead><tr>{headers.map((cell) => <th key={cell}>{renderInline(cell, space, defaultSpace)}</th>)}</tr></thead><tbody>{rows.map((row, rowIndex) => <tr key={`row-${rowIndex}`}>{row.map((cell, cellIndex) => <td key={`${cell}-${cellIndex}`}>{renderInline(cell, space, defaultSpace)}</td>)}</tr>)}</tbody></table></div>);
-      return cursor - 1;
-    }
-
-    for (let index = 0; index < lines.length; index += 1) {
-      const rawLine = lines[index];
-      const line = rawLine.trim();
-      if (line.startsWith("```")) {
-        if (inCode) { inCode = false; flushCode(); } else { flushList(); inCode = true; }
-        continue;
-      }
-      if (inCode) { codeLines.push(rawLine); continue; }
-      if (!line) { flushList(); continue; }
-      const nextIndex = tryTable(index);
-      if (nextIndex !== index) { flushList(); index = nextIndex; continue; }
-      const heading = /^(#{1,4})\s+(.+)$/.exec(line);
-      if (heading) {
-        flushList();
-        // Demote headings by one level so a migrated markdown body nests
-        // under the article title (h1 is reserved for the article itself).
-        const level = Math.min(4, Math.max(2, heading[1].length + 1));
-        const title = heading[2].replace(/#+$/, "").trim();
-        const id = slugifyHeading(title);
-        const copy = <button className={styles.headingLink} type="button" aria-label={`Copy link to ${title}`} onClick={() => void copyHeadingLink(id)}>#</button>;
-        if (level === 2) result.push(<h2 id={id} key={id}>{copy}{title}</h2>);
-        else if (level === 3) result.push(<h3 id={id} key={id}>{copy}{title}</h3>);
-        else result.push(<h4 id={id} key={id}>{copy}{title}</h4>);
-        continue;
-      }
-      const unordered = /^[-*]\s+(.+)$/.exec(line);
-      if (unordered) { listItems.push(unordered[1]); continue; }
-      const ordered = /^\d+\.\s+(.+)$/.exec(line);
-      if (ordered) { orderedItems.push(ordered[1]); continue; }
-      flushList();
-      if (line.startsWith(">")) result.push(<blockquote key={`quote-${result.length}`}>{renderInline(line.replace(/^>\s?/, ""), space, defaultSpace)}</blockquote>);
-      else result.push(<p key={`p-${result.length}`}>{renderInline(line, space, defaultSpace)}</p>);
-    }
-    flushList();
-    flushCode();
-    return result;
-  }, [markdown, space, defaultSpace]);
-
-  return <>{blocks}</>;
-}
-
 export function TutorialPager({ previous, next, space, defaultSpace }: Readonly<{ previous: TutorialAdjacentArticle | null; next: TutorialAdjacentArticle | null; space: string; defaultSpace: string }>) {
   return (
     <nav className={styles.pager} aria-label="Article pagination">
@@ -294,49 +157,17 @@ function editHref(article: TutorialArticle, space: TutorialSpaceSettings): strin
   return space.github_url ?? null;
 }
 
-function ArticleSections({ sections, space, defaultSpace }: Readonly<{ sections: readonly TutorialArticleSection[]; space: string; defaultSpace: string }>) {
-  return (
-    <>
-      {sections.map((section, index) => {
-        const image = safeHref(section.section_image);
-        const video = safeHref(section.section_video_link);
-        const link = safeHref(section.section_link);
-        const sectionTitle = section.section_title;
-        return (
-          <section className={styles.articleSection} key={`${sectionTitle || "section"}-${index}`}>
-            {sectionTitle ? (
-              <h2 id={slugifyHeading(sectionTitle)}>
-                <button className={styles.headingLink} type="button" aria-label={`Copy link to ${sectionTitle}`} onClick={() => void copyHeadingLink(slugifyHeading(sectionTitle))}>#</button>
-                {sectionTitle}
-              </h2>
-            ) : null}
-            {section.section_subtitle ? <p className={styles.sectionSubtitle}>{section.section_subtitle}</p> : null}
-            {image ? <img src={image} alt={sectionTitle || "Section image"} loading="lazy" /> : null}
-            {video ? (
-              <p className={styles.sectionVideo}>
-                <a href={video} target="_blank" rel="noopener noreferrer">▶ Watch video</a>
-              </p>
-            ) : null}
-            {section.section_description ? <MarkdownText markdown={section.section_description} space={space} defaultSpace={defaultSpace} /> : null}
-            {link ? renderSafeLink(link, section.section_link_title || "Learn more", `section-link-${index}`, space, defaultSpace) : null}
-          </section>
-        );
-      })}
-    </>
-  );
-}
-
 export function TutorialArticle({ payload, space, defaultSpace }: Readonly<{ payload: TutorialPagePayload; space: string; defaultSpace: string }>) {
   const { article } = payload;
   const editUrl = editHref(article, payload.space);
-  const sections = article.body_sections;
-  const hasSections = Array.isArray(sections) && sections.length > 0;
+  const blocks = article.content_blocks;
+  const hasBlocks = Array.isArray(blocks) && blocks.length > 0;
   return (
     <article className={styles.article}>
       {editUrl ? <div className={styles.articleToolbar}><a className={styles.editLink} href={editUrl} target="_blank" rel="noopener noreferrer"><FiEdit3 aria-hidden />Edit</a></div> : null}
       <div className={styles.rule} />
       <h1 id={slugifyHeading(article.title)}>{article.title}</h1>
-      {hasSections ? <ArticleSections sections={sections} space={space} defaultSpace={defaultSpace} /> : null}
+      {hasBlocks ? <TutorialBlockRenderer blocks={blocks} space={space} defaultSpace={defaultSpace} /> : null}
       <TutorialPager previous={payload.previous_article} next={payload.next_article} space={space} defaultSpace={defaultSpace} />
       <TutorialFeedback />
     </article>
@@ -404,6 +235,7 @@ export function TutorialShell({ payload, spaces = null, defaultSpace = DEFAULT_S
   const [activeId, setActiveId] = useState(payload.table_of_contents[0]?.id);
   const searchRows = useMemo(() => allSearchRows(payload.navigation), [payload.navigation]);
   const space = payload.space.slug;
+  const article = payload.article;
 
   useEffect(() => {
     const handler = (event: globalThis.KeyboardEvent) => {
@@ -427,9 +259,9 @@ export function TutorialShell({ payload, spaces = null, defaultSpace = DEFAULT_S
     <div className={`tutorial-page ${styles.page}`} data-theme="light">
       <TutorialHeader payload={payload} spaces={spaces} defaultSpace={defaultSpace} onOpenSearch={() => setSearchOpen(true)} />
       <div className={styles.shell}>
-        <aside className={styles.sidebar}><TutorialSidebar navigation={payload.navigation} activeSlug={payload.article.slug} space={space} defaultSpace={defaultSpace} /></aside>
+        {article.show_sidebar === 0 || article.show_sidebar === false ? null : <aside className={styles.sidebar}><TutorialSidebar navigation={payload.navigation} activeSlug={payload.article.slug} space={space} defaultSpace={defaultSpace} /></aside>}
         <div className={styles.main}><TutorialArticle payload={payload} space={space} defaultSpace={defaultSpace} /><DocTypeFields payload={payload} /></div>
-        <TutorialTableOfContents toc={payload.table_of_contents} activeId={activeId} />
+        {article.show_toc === 0 || article.show_toc === false ? null : <TutorialTableOfContents toc={payload.table_of_contents} activeId={activeId} />}
       </div>
       <TutorialSearchDialog rows={searchRows} open={searchOpen} onClose={() => setSearchOpen(false)} space={space} defaultSpace={defaultSpace} />
       <TutorialMobileDrawer open={mobileMenuOpen} navigation={payload.navigation} activeSlug={payload.article.slug} space={space} defaultSpace={defaultSpace} onClose={() => setMobileMenuOpen(false)} />

@@ -103,9 +103,10 @@ function normalizePageAssets(payload: TutorialPagePayload, frappeBaseUrl: string
     space: normalizeSpaceAssets(payload.space, frappeBaseUrl),
     article: {
       ...payload.article,
-      body_sections: payload.article.body_sections.map((section) => ({
-        ...section,
-        section_image: withFrappeAssetBase(section.section_image, frappeBaseUrl),
+      content_blocks: (payload.article.content_blocks ?? []).map((block) => ({
+        ...block,
+        image: withFrappeAssetBase(block.image, frappeBaseUrl),
+        video_url: withFrappeAssetBase(block.video_url, frappeBaseUrl),
       })),
     },
   };

@@ -46,7 +46,7 @@ const validPagePayload = {
       title: "Welcome",
       slug: "welcome",
       summary: "Start",
-      body_sections: [{ section_title: "Welcome", section_description: "Body" }],
+      content_blocks: [{ block_type: "Heading", title: "Welcome" }, { block_type: "Markdown", content: "Body" }],
       seo_title: "Welcome SEO",
       seo_description: "SEO description",
       source_url: "content://ionic-tutorial/articles/welcome.md",
@@ -83,20 +83,20 @@ describe("Ionic Tutorial API client", () => {
     expect(fetchMock.mock.calls[0][1]?.headers).not.toHaveProperty("authorization");
   });
 
-  it("parses article body_sections (child table rows) when present", async () => {
+  it("parses article content_blocks (child table rows) when present", async () => {
     process.env.FRAPPE_BASE_URL = "https://next.ionicerp.xyz";
     const pagePayload = {
       message: {
         ...validPagePayload.message,
         article: {
           ...validPagePayload.message.article,
-          body_sections: [
-            { section_title: "Getting Started", section_link: "https://example.com/setup" },
+          content_blocks: [
+            { block_type: "Heading", title: "Getting Started" },
             {
-              section_title: "Second",
-              section_image: "javascript:alert(1)",
-              section_video_link: "",
-              section_description: "Body text",
+              block_type: "Markdown",
+              content: "Body text",
+              image: "javascript:alert(1)",
+              video_url: "",
             },
           ],
         },
@@ -106,20 +106,20 @@ describe("Ionic Tutorial API client", () => {
     const api = await loadApi();
     const payload = await api.getTutorialPage("welcome");
 
-    expect(payload.article.body_sections).toHaveLength(2);
-    expect(payload.article.body_sections?.[0].section_title).toBe("Getting Started");
-    expect(payload.article.body_sections?.[0].section_link).toBe("https://example.com/setup");
-    expect(payload.article.body_sections?.[1].section_description).toBe("Body text");
-    expect(payload.article.body_sections?.[1].section_image).toBe("javascript:alert(1)");
-    expect(payload.article.body_sections?.[1].section_video_link).toBe("");
+    expect(payload.article.content_blocks).toHaveLength(2);
+    expect(payload.article.content_blocks?.[0].block_type).toBe("Heading");
+    expect(payload.article.content_blocks?.[0].title).toBe("Getting Started");
+    expect(payload.article.content_blocks?.[1].content).toBe("Body text");
+    expect(payload.article.content_blocks?.[1].image).toBe("javascript:alert(1)");
+    expect(payload.article.content_blocks?.[1].video_url).toBe("");
   });
 
-  it("rejects an article whose body_sections contain a malformed row", async () => {
+  it("rejects an article whose content_blocks contain a malformed row", async () => {
     process.env.FRAPPE_BASE_URL = "https://next.ionicerp.xyz";
     const bad = {
       message: {
         ...validPagePayload.message,
-        article: { ...validPagePayload.message.article, body_sections: ["nope"] },
+        article: { ...validPagePayload.message.article, content_blocks: ["nope"] },
       },
     };
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(bad)));
@@ -209,14 +209,14 @@ describe("Ionic Tutorial API client", () => {
         space: { ...validPagePayload.message.space, logo: "/files/tamim-hassan-logo.png" },
         article: {
           ...validPagePayload.message.article,
-          body_sections: [{ section_title: "Cover", section_image: "/files/cover.png" }],
+          content_blocks: [{ block_type: "Image", image: "/files/cover.png" }],
         },
       },
     })));
     const api = await loadApi();
     const page = await api.getTutorialPage("welcome");
     expect(page.space.logo).toBe("https://next.ionicerp.xyz/files/tamim-hassan-logo.png");
-    expect(page.article.body_sections?.[0].section_image).toBe("https://next.ionicerp.xyz/files/cover.png");
+    expect(page.article.content_blocks?.[0].image).toBe("https://next.ionicerp.xyz/files/cover.png");
   });
 
   it("defaults to a 60s revalidate and allows 0 to disable caching entirely", async () => {

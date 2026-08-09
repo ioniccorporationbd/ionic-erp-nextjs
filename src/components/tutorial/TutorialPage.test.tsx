@@ -36,10 +36,14 @@ const payload: TutorialPagePayload = {
     title: "Welcome",
     slug: "welcome",
     summary: "Start here",
-    body_sections: [
+    content_blocks: [
       {
-        section_title: "Install",
-        section_description: "LongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLong\n\n```bash\nbench --site next.ionicerp.xyz migrate\n```\n\n| Key | Value |\n| --- | --- |\n| Space | ionic-tutorial |\n\n> Note for admins\n\n[External](https://example.com) and [bad](javascript:alert(1)).",
+        block_type: "Heading",
+        title: "Install",
+      },
+      {
+        block_type: "Markdown",
+        content: "LongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLong\n\n```bash\nbench --site next.ionicerp.xyz migrate\n```\n\n| Key | Value |\n| --- | --- |\n| Space | ionic-tutorial |\n\n> Note for admins\n\n[External](https://example.com) and [bad](javascript:alert(1)).",
       },
     ],
     source_updated_at: "2026-08-02 18:37:15.196692",
@@ -90,59 +94,89 @@ describe("TutorialPage Frappe-style shell", () => {
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining("#install"));
   });
 
-  it("renders structured Body Sections (child table) when present, skipping the markdown body", () => {
-    const sectionPayload: TutorialPagePayload = {
+  it("renders typed content blocks with safe media and drops unsafe URLs", () => {
+    const blockPayload: TutorialPagePayload = {
       ...payload,
       article: {
         ...payload.article,
-        body_sections: [
+        content_blocks: [
           {
-            section_title: "Getting Started",
-            section_subtitle: "First steps",
-            section_image: "https://example.com/a.png",
-            section_video_link: "https://www.youtube.com/watch?v=abc123",
-            section_description: "Install the app and log in.",
-            section_link_title: "Full setup guide",
-            section_link: "https://example.com/setup",
+            block_type: "Heading",
+            title: "Getting Started",
           },
           {
-            section_title: "Unsafe Section",
-            section_image: "javascript:alert(1)",
-            section_video_link: "chrome://settings",
-            section_link: "javascript:alert(2)",
+            block_type: "Markdown",
+            content: "Install the app and log in.",
+          },
+          {
+            block_type: "Image",
+            image: "https://example.com/a.png",
+            image_alt: "Getting Started",
+            caption: "Setup screen",
+          },
+          {
+            block_type: "Video",
+            title: "Setup video",
+            video_url: "https://www.youtube.com/watch?v=abc123def45",
+          },
+          {
+            block_type: "Image Text",
+            image: "https://example.com/b.png",
+            image_alt: "Side by side",
+            title: "Side by side",
+            content: "Prose beside media.",
+            layout: "image-right",
+          },
+          {
+            block_type: "Callout",
+            title: "Heads up",
+            content: "Callout note.",
+          },
+          {
+            block_type: "Divider",
+          },
+          {
+            block_type: "Image",
+            image: "javascript:alert(1)",
+            image_alt: "Unsafe Section",
+          },
+          {
+            block_type: "Video",
+            title: "Unsafe video",
+            video_url: "chrome://settings",
           },
         ],
       },
     };
-    render(<TutorialPage payload={sectionPayload} />);
+    render(<TutorialPage payload={blockPayload} />);
 
-    // The article title becomes the page h1 when sections are present
+    // The article title becomes the page h1 when blocks are present
     expect(screen.getByRole("heading", { level: 1, name: "Welcome" })).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getByRole("heading", { level: 2, name: /Getting Started/ })).toBeInTheDocument();
-    expect(screen.getByText("First steps")).toBeInTheDocument();
     expect(screen.getByText("Install the app and log in.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 3, name: "Side by side" })).toBeInTheDocument();
+    expect(screen.getByText("Callout note.")).toBeInTheDocument();
+    expect(screen.getByRole("separator")).toBeInTheDocument();
 
-    // The markdown body is NOT rendered for section-based articles
+    // The markdown body of the base fixture is NOT rendered for block articles
     expect(screen.queryByText("bench --site next.ionicerp.xyz migrate")).not.toBeInTheDocument();
-    expect(screen.queryByRole("table")).not.toBeInTheDocument();
 
-    // Safe image renders lazily; video renders as an external link
+    // Safe image renders lazily with alt + caption
     const image = screen.getByAltText("Getting Started");
     expect(image).toHaveAttribute("src", "https://example.com/a.png");
     expect(image).toHaveAttribute("loading", "lazy");
-    const video = screen.getByRole("link", { name: "▶ Watch video" });
-    expect(video).toHaveAttribute("href", "https://www.youtube.com/watch?v=abc123");
-    expect(video).toHaveAttribute("target", "_blank");
-    expect(video).toHaveAttribute("rel", expect.stringContaining("noopener"));
+    expect(screen.getByText("Setup screen")).toBeInTheDocument();
 
-    // Section link renders with its title
-    expect(screen.getByRole("link", { name: "Full setup guide" })).toHaveAttribute("href", "https://example.com/setup");
+    // Video renders as a safe YouTube embed iframe
+    const video = screen.getByTitle("Setup video");
+    expect(video.tagName).toBe("IFRAME");
+    expect(video).toHaveAttribute("src", "https://www.youtube.com/embed/abc123def45");
+    expect(video).toHaveAttribute("allowFullScreen");
 
-    // Unsafe section URLs are dropped entirely
+    // Unsafe block URLs are dropped entirely
     expect(screen.queryByAltText("Unsafe Section")).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Learn more" })).not.toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: "▶ Watch video" })).toHaveLength(1);
+    expect(screen.queryByTitle("Unsafe video")).not.toBeInTheDocument();
   });
 
   it("renders an accessible space dropdown with the current space highlighted and ?space= links", async () => {
