@@ -41,12 +41,11 @@ describe("DOCTYPE_FIELDS registry", () => {
     expect(DOCTYPE_FIELDS.category).toHaveLength(6);
   });
 
-  it("shows the curated Ionic Tutorial Article field set (11 visible fields)", () => {
+  it("shows the curated Ionic Tutorial Article field set (10 visible fields)", () => {
     expect(DOCTYPE_FIELDS.article.map((f) => f.fieldname)).toEqual([
       "slug",
       "space",
       "category",
-      "body_markdown",
       "body_sections",
       "seo_title",
       "source_url",
@@ -55,7 +54,7 @@ describe("DOCTYPE_FIELDS registry", () => {
       "sort_order",
       "published",
     ]);
-    expect(DOCTYPE_FIELDS.article).toHaveLength(11);
+    expect(DOCTYPE_FIELDS.article).toHaveLength(10);
   });
 });
 
@@ -101,15 +100,14 @@ describe("buildDocTypeRows", () => {
     expect(byName.slug.value).toBe("welcome");
     expect(byName.space.value).toBe("ionic-tutorial");
     expect(byName.category.value).toBe("getting-started");
-    expect(byName.body_markdown.kind).toBe("markdown");
-    expect(byName.body_markdown.value).toContain("Welcome");
+    expect(byName.body_sections.present).toBe(true);
+    expect(byName.body_sections.value).toBe("2 rows");
     expect(byName.seo_title.value).toBe("Welcome to Ionic Tutorial");
     expect(byName.source_url.kind).toBe("text"); // content:// is not a clickable href
     expect(byName.source_updated_at.value).toBe("2026-08-02 00:00:00");
     expect(byName.sort_order.value).toBe("1");
     expect(byName.source_hash.present).toBe(false);
     expect(byName.published.present).toBe(false);
-    expect(byName.body_sections.present).toBe(false); // no child-table rows in the mock article
   });
 
   it("reports Body Sections row count when the article has child-table rows", () => {
@@ -151,11 +149,12 @@ describe("buildDocTypeRows", () => {
     expect(space.sort_order.value).toBe("2");
   });
 
-  it("keeps removed fields out of the article rows (title, summary, cover_image, seo_description)", () => {
+  it("keeps removed fields out of the article rows (title, summary, body_markdown, cover_image, seo_description)", () => {
     const rows = buildDocTypeRows(mockTutorialPages["long-article"]).article;
     const fieldnames = rows.map((row) => row.fieldname);
     expect(fieldnames).not.toContain("title");
     expect(fieldnames).not.toContain("summary");
+    expect(fieldnames).not.toContain("body_markdown");
     expect(fieldnames).not.toContain("cover_image");
     expect(fieldnames).not.toContain("seo_description");
     // remaining rows still resolve from the payload

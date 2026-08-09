@@ -21,6 +21,7 @@ export async function generateMetadata({ searchParams }: TutorialRouteProps): Pr
     const title = payload.article.seo_title || payload.article.title;
     const description = payload.article.seo_description || payload.article.summary || payload.space.short_description;
     const canonical = tutorialCanonicalUrl(null, space);
+    const coverImage = payload.article.body_sections.find((section) => section.section_image)?.section_image;
     return {
       metadataBase: new URL((process.env.SITE_BASE_URL || "https://www.ionicerp.xyz").replace(/\/+$/, "")),
       title,
@@ -31,7 +32,7 @@ export async function generateMetadata({ searchParams }: TutorialRouteProps): Pr
         description,
         url: canonical,
         type: "article",
-        images: payload.article.cover_image ? [payload.article.cover_image] : undefined,
+        images: coverImage ? [coverImage] : undefined,
       },
     };
   } catch {

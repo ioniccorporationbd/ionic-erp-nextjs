@@ -44,9 +44,7 @@ export interface TutorialArticle {
   readonly title: string;
   readonly slug: string;
   readonly summary?: string;
-  readonly body_markdown: string;
-  readonly body_sections?: readonly TutorialArticleSection[];
-  readonly cover_image?: string;
+  readonly body_sections: readonly TutorialArticleSection[];
   readonly seo_title?: string;
   readonly seo_description?: string;
   readonly source_url?: string;

@@ -46,7 +46,7 @@ const validPagePayload = {
       title: "Welcome",
       slug: "welcome",
       summary: "Start",
-      body_markdown: "# Welcome\n\nBody",
+      body_sections: [{ section_title: "Welcome", section_description: "Body" }],
       seo_title: "Welcome SEO",
       seo_description: "SEO description",
       source_url: "content://ionic-tutorial/articles/welcome.md",
@@ -207,13 +207,16 @@ describe("Ionic Tutorial API client", () => {
       message: {
         ...validPagePayload.message,
         space: { ...validPagePayload.message.space, logo: "/files/tamim-hassan-logo.png" },
-        article: { ...validPagePayload.message.article, cover_image: "/files/cover.png" },
+        article: {
+          ...validPagePayload.message.article,
+          body_sections: [{ section_title: "Cover", section_image: "/files/cover.png" }],
+        },
       },
     })));
     const api = await loadApi();
     const page = await api.getTutorialPage("welcome");
     expect(page.space.logo).toBe("https://next.ionicerp.xyz/files/tamim-hassan-logo.png");
-    expect(page.article.cover_image).toBe("https://next.ionicerp.xyz/files/cover.png");
+    expect(page.article.body_sections?.[0].section_image).toBe("https://next.ionicerp.xyz/files/cover.png");
   });
 
   it("defaults to a 60s revalidate and allows 0 to disable caching entirely", async () => {

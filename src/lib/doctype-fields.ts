@@ -56,7 +56,6 @@ export const DOCTYPE_FIELDS: Readonly<Record<DocTypeName, readonly DocTypeFieldD
     { fieldname: "slug", label: "Slug", type: "Data" },
     { fieldname: "space", label: "Space", type: "Link" },
     { fieldname: "category", label: "Category", type: "Link" },
-    { fieldname: "body_markdown", label: "Body Markdown", type: "Markdown Editor" },
     { fieldname: "body_sections", label: "Body Sections", type: "Table" },
     { fieldname: "seo_title", label: "SEO Title", type: "Data" },
     { fieldname: "source_url", label: "Source URL", type: "Data" },
@@ -71,7 +70,6 @@ export type DocTypeFieldKind =
   | "text"
   | "url"
   | "json"
-  | "markdown"
   | "image"
   | "missing";
 
@@ -175,8 +173,6 @@ function articleValue(
     case "title":
     case "slug":
     case "summary":
-    case "body_markdown":
-    case "cover_image":
     case "seo_title":
     case "seo_description":
     case "source_url":
@@ -202,7 +198,6 @@ function kindFor(fieldname: string, type: string, value: string): DocTypeFieldKi
   if (URL_FIELDS.has(fieldname) && safeHref(value)) return "url";
   if (type === "Attach Image" && imageHref(value)) return "image";
   if (fieldname === "theme_config_json") return "json";
-  if (fieldname === "body_markdown") return "markdown";
   return "text";
 }
 
@@ -216,12 +211,7 @@ function buildRows(
       return { ...def, value: MISSING, present: false, kind: "missing" };
     }
     const kind = kindFor(def.fieldname, def.type, raw);
-    const value =
-      kind === "json"
-        ? formatJson(raw)
-        : kind === "markdown"
-          ? truncate(raw.replace(/\s+/g, " ").trim())
-          : truncate(raw, 240);
+    const value = kind === "json" ? formatJson(raw) : truncate(raw, 240);
     return { ...def, value, present: true, kind, href: kind === "url" ? raw : kind === "image" ? imageHref(raw) : undefined };
   });
 }

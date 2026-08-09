@@ -193,7 +193,7 @@ export function TutorialSidebar({ navigation, activeSlug, space, defaultSpace, o
   );
 }
 
-function MarkdownArticle({ markdown, space, defaultSpace }: Readonly<{ markdown: string; space: string; defaultSpace: string }>) {
+function MarkdownText({ markdown, space, defaultSpace }: Readonly<{ markdown: string; space: string; defaultSpace: string }>) {
   const blocks = useMemo(() => {
     const lines = markdown.split(/\r?\n/);
     const result: ReactNode[] = [];
@@ -242,12 +242,13 @@ function MarkdownArticle({ markdown, space, defaultSpace }: Readonly<{ markdown:
       const heading = /^(#{1,4})\s+(.+)$/.exec(line);
       if (heading) {
         flushList();
-        const level = Math.min(4, Math.max(1, heading[1].length));
+        // Demote headings by one level so a migrated markdown body nests
+        // under the article title (h1 is reserved for the article itself).
+        const level = Math.min(4, Math.max(2, heading[1].length + 1));
         const title = heading[2].replace(/#+$/, "").trim();
         const id = slugifyHeading(title);
         const copy = <button className={styles.headingLink} type="button" aria-label={`Copy link to ${title}`} onClick={() => void copyHeadingLink(id)}>#</button>;
-        if (level === 1) result.push(<h1 id={id} key={id}>{copy}{title}</h1>);
-        else if (level === 2) result.push(<h2 id={id} key={id}>{copy}{title}</h2>);
+        if (level === 2) result.push(<h2 id={id} key={id}>{copy}{title}</h2>);
         else if (level === 3) result.push(<h3 id={id} key={id}>{copy}{title}</h3>);
         else result.push(<h4 id={id} key={id}>{copy}{title}</h4>);
         continue;
@@ -300,19 +301,23 @@ function ArticleSections({ sections, space, defaultSpace }: Readonly<{ sections:
         const image = safeHref(section.section_image);
         const video = safeHref(section.section_video_link);
         const link = safeHref(section.section_link);
+        const sectionTitle = section.section_title;
         return (
-          <section className={styles.articleSection} key={`${section.section_title || "section"}-${index}`}>
-            {section.section_title ? (
-              <h2 id={slugifyHeading(section.section_title)}>{section.section_title}</h2>
+          <section className={styles.articleSection} key={`${sectionTitle || "section"}-${index}`}>
+            {sectionTitle ? (
+              <h2 id={slugifyHeading(sectionTitle)}>
+                <button className={styles.headingLink} type="button" aria-label={`Copy link to ${sectionTitle}`} onClick={() => void copyHeadingLink(slugifyHeading(sectionTitle))}>#</button>
+                {sectionTitle}
+              </h2>
             ) : null}
             {section.section_subtitle ? <p className={styles.sectionSubtitle}>{section.section_subtitle}</p> : null}
-            {image ? <img src={image} alt={section.section_title || "Section image"} loading="lazy" /> : null}
+            {image ? <img src={image} alt={sectionTitle || "Section image"} loading="lazy" /> : null}
             {video ? (
               <p className={styles.sectionVideo}>
                 <a href={video} target="_blank" rel="noopener noreferrer">▶ Watch video</a>
               </p>
             ) : null}
-            {section.section_description ? <p>{section.section_description}</p> : null}
+            {section.section_description ? <MarkdownText markdown={section.section_description} space={space} defaultSpace={defaultSpace} /> : null}
             {link ? renderSafeLink(link, section.section_link_title || "Learn more", `section-link-${index}`, space, defaultSpace) : null}
           </section>
         );
@@ -330,14 +335,8 @@ export function TutorialArticle({ payload, space, defaultSpace }: Readonly<{ pay
     <article className={styles.article}>
       {editUrl ? <div className={styles.articleToolbar}><a className={styles.editLink} href={editUrl} target="_blank" rel="noopener noreferrer"><FiEdit3 aria-hidden />Edit</a></div> : null}
       <div className={styles.rule} />
-      {hasSections ? (
-        <>
-          <h1 id={slugifyHeading(article.title)}>{article.title}</h1>
-          <ArticleSections sections={sections} space={space} defaultSpace={defaultSpace} />
-        </>
-      ) : (
-        <MarkdownArticle markdown={article.body_markdown} space={space} defaultSpace={defaultSpace} />
-      )}
+      <h1 id={slugifyHeading(article.title)}>{article.title}</h1>
+      {hasSections ? <ArticleSections sections={sections} space={space} defaultSpace={defaultSpace} /> : null}
       <TutorialPager previous={payload.previous_article} next={payload.next_article} space={space} defaultSpace={defaultSpace} />
       <TutorialFeedback />
     </article>

@@ -11,10 +11,10 @@ describe("DocTypeFields", () => {
     const groups = within(region).getAllByRole("article");
     expect(groups).toHaveLength(3);
 
-    // Space: 16 rows, category: 6 rows, article: 11 rows
+    // Space: 16 rows, category: 6 rows, article: 10 rows
     expect(within(groups[0]).getAllByRole("term")).toHaveLength(16);
     expect(within(groups[1]).getAllByRole("term")).toHaveLength(6);
-    expect(within(groups[2]).getAllByRole("term")).toHaveLength(11);
+    expect(within(groups[2]).getAllByRole("term")).toHaveLength(10);
   });
 
   it("shows every Article field value from the payload", () => {
@@ -22,7 +22,8 @@ describe("DocTypeFields", () => {
     const region = screen.getByRole("region", { name: /DocType Fields/ });
     const articleGroup = within(region).getAllByRole("article")[2];
 
-    expect(within(articleGroup).getByText("body_markdown")).toBeInTheDocument();
+    expect(within(articleGroup).getByText("body_sections")).toBeInTheDocument();
+    expect(within(articleGroup).getByText("2 rows")).toBeInTheDocument();
     expect(within(articleGroup).getByText("getting-started")).toBeInTheDocument();
     expect(within(articleGroup).getByText("2026-08-02 00:00:00")).toBeInTheDocument();
   });
@@ -50,11 +51,11 @@ describe("DocTypeFields", () => {
 
     // space mock lacks source_base_url + attribution_text + theme_config_json +
     // default_article + published + sort_order (6); category: published;
-    // article: source_hash + published + body_sections (3)
+    // article: source_hash + published (2)
     expect(within(groups[0]).getAllByText("—")).toHaveLength(6);
     expect(within(groups[1]).getAllByText("—")).toHaveLength(1);
-    expect(within(groups[2]).getAllByText("—")).toHaveLength(3);
-    expect(within(region).getAllByText(/public API-তে নেই \/ খালি/)).toHaveLength(10);
+    expect(within(groups[2]).getAllByText("—")).toHaveLength(2);
+    expect(within(region).getAllByText(/public API-তে নেই \/ খালি/)).toHaveLength(9);
   });
 
   it("expands and collapses on click of the summary", () => {

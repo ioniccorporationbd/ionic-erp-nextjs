@@ -36,7 +36,12 @@ const payload: TutorialPagePayload = {
     title: "Welcome",
     slug: "welcome",
     summary: "Start here",
-    body_markdown: "# Welcome\n\n## Install\n\nLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLong\n\n```bash\nbench --site next.ionicerp.xyz migrate\n```\n\n| Key | Value |\n| --- | --- |\n| Space | ionic-tutorial |\n\n> Note for admins\n\n[External](https://example.com) and [bad](javascript:alert(1)).",
+    body_sections: [
+      {
+        section_title: "Install",
+        section_description: "LongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLong\n\n```bash\nbench --site next.ionicerp.xyz migrate\n```\n\n| Key | Value |\n| --- | --- |\n| Space | ionic-tutorial |\n\n> Note for admins\n\n[External](https://example.com) and [bad](javascript:alert(1)).",
+      },
+    ],
     source_updated_at: "2026-08-02 18:37:15.196692",
     sort_order: 1,
   },
@@ -114,7 +119,7 @@ describe("TutorialPage Frappe-style shell", () => {
     // The article title becomes the page h1 when sections are present
     expect(screen.getByRole("heading", { level: 1, name: "Welcome" })).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
-    expect(screen.getByRole("heading", { level: 2, name: "Getting Started" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: /Getting Started/ })).toBeInTheDocument();
     expect(screen.getByText("First steps")).toBeInTheDocument();
     expect(screen.getByText("Install the app and log in.")).toBeInTheDocument();
 

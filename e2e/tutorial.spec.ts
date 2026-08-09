@@ -79,7 +79,7 @@ test.describe("Ionic Tutorial API-driven documentation", () => {
     await expect(page).toHaveURL(/\/tutorial\/long-article$/);
     await page.getByRole("link", { name: /Next New Article Added After Frontend Build/ }).click();
     await expect(page).toHaveURL(/\/tutorial\/post-build-article$/);
-    await expect(page.getByRole("heading", { level: 1, name: "Post Build" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 2, name: "Post Build" })).toBeVisible();
   });
 
   test("heading anchors and table-of-contents navigation", async ({ page }) => {
