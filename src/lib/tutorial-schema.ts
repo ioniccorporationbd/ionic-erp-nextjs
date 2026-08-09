@@ -33,6 +33,13 @@ function numberField(record: RecordValue, key: string): number {
   throw new TutorialApiError("INVALID_PAYLOAD", `Invalid tutorial payload field: ${key}`);
 }
 
+function numberFieldOptional(record: RecordValue, key: string): number | undefined {
+  const value = record[key];
+  if (value == null) return undefined;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  throw new TutorialApiError("INVALID_PAYLOAD", `Invalid tutorial payload field: ${key}`);
+}
+
 function nullableRecord(record: RecordValue, key: string): RecordValue | null {
   const value = record[key];
   if (value === null) return null;
@@ -72,6 +79,8 @@ function parseSpaceSettings(value: unknown): TutorialSpaceSettings {
     github_url: stringField(value, "github_url", false),
     source_base_url: stringField(value, "source_base_url", false),
     attribution_text: stringField(value, "attribution_text", false),
+    theme_config_json: stringField(value, "theme_config_json", false),
+    sort_order: numberFieldOptional(value, "sort_order"),
   };
 }
 
@@ -107,6 +116,7 @@ function parseArticle(value: unknown): TutorialArticle {
     seo_title: stringField(value, "seo_title", false),
     seo_description: stringField(value, "seo_description", false),
     source_url: stringField(value, "source_url", false),
+    source_hash: stringField(value, "source_hash", false),
     source_updated_at: stringField(value, "source_updated_at", false),
     sort_order: numberField(value, "sort_order"),
   };

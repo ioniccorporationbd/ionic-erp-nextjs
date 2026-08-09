@@ -191,3 +191,33 @@
 @media (max-width: 767px) { .page { font-size: 14px; } .topbar { display: flex; height: 55px; justify-content: space-between; padding: 0 16px; } .brand { font-size: 15px; padding: 0; } .brand img { height: 23px; width: 23px; } .brandChevron, .desktopSearch { display: none; } .backHome { font-size: 12px; height: 30px; padding: 0 10px; } .shell { display: block; } .sidebar, .onThisPage { display: none; } .main { display: block; padding: 48px 16px 70px; } .article { max-width: none; } .articleToolbar { align-items: flex-start; flex-direction: column-reverse; } .articleToolbar h1 { font-size: 23px; margin: 16px 0 0; } .rule { margin: 23px 0; } .article > p, .article section p, .article li { font-size: 15px; line-height: 1.64; } .heroImage { border-radius: 5px; margin: 17px 0 27px; } .article h2 { font-size: 20px; margin-top: 27px; } .headingLink { margin-left: 0; opacity: 1; } .article ul, .article ol { padding-left: 22px; } .mobileDrawer { display: block; } .floatingMenu { align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; bottom: 10px; box-shadow: 0 2px 8px rgb(0 0 0 / .08); color: var(--ink); display: flex; font-size: 16px; gap: 8px; height: 42px; padding: 0 15px; position: fixed; right: 35px; z-index: 35; } .pager { grid-template-columns: 1fr; } }
 @media (max-width: 374px) { .main { padding-left: 14px; padding-right: 14px; } .topbar { padding-left: 14px; padding-right: 14px; } }
 @media (max-width: 767px) { .spaceMenu { left: 0; min-width: min(280px, calc(100vw - 28px)); } }
+
+/* DocType Fields explorer (article page, bottom) */
+.doctypeFields { margin-top: 34px; max-width: 640px; }
+.doctypeDetails { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+.doctypeSummary { align-items: center; cursor: pointer; display: flex; flex-wrap: wrap; gap: 8px 12px; font-weight: 600; list-style: none; padding: 14px 18px; }
+.doctypeSummary::-webkit-details-marker { display: none; }
+.doctypeSummary::before { content: "▸"; color: var(--muted); font-size: 13px; transition: transform .15s ease; }
+.doctypeDetails[open] .doctypeSummary::before { transform: rotate(90deg); }
+.doctypeBadge { background: var(--panel-2, #f1f5f9); border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 11px; font-weight: 500; padding: 2px 10px; }
+.doctypeIntro { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; line-height: 1.6; margin: 0; padding: 12px 18px; }
+.doctypeGroup { border-top: 1px solid var(--line); padding: 14px 18px 18px; }
+.doctypeGroupTitle { align-items: baseline; display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 15px; margin: 0 0 12px; }
+.doctypeGroupTitle code { background: var(--panel-2, #f1f5f9); border: 1px solid var(--line); border-radius: 6px; color: var(--ink); font-size: 12px; padding: 2px 8px; }
+.doctypeGroupCaption { color: var(--muted); font-size: 12px; font-weight: 400; }
+.doctypeList { margin: 0; }
+.doctypeRow { border-top: 1px dashed var(--line); display: grid; gap: 2px 14px; grid-template-columns: minmax(0, 240px) minmax(0, 1fr); padding: 9px 0; }
+.doctypeRow:first-child { border-top: 0; }
+.doctypeTerm { align-items: baseline; display: flex; flex-wrap: wrap; gap: 2px 8px; min-width: 0; }
+.doctypeFieldname { color: var(--ink); font-size: 12px; }
+.doctypeLabel { color: var(--muted); font-size: 12px; }
+.doctypeType { color: var(--muted); font-size: 10px; font-style: normal; opacity: .75; }
+.doctypeValue { color: var(--ink); font-size: 13px; line-height: 1.55; margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.doctypeText { white-space: pre-wrap; }
+.doctypeLink { color: var(--accent, #2563eb); overflow-wrap: anywhere; }
+.doctypeMissing { color: var(--muted); font-style: italic; }
+.doctypeMissing small { display: block; font-size: 11px; font-style: normal; opacity: .8; }
+.doctypeJson { background: var(--panel-2, #f8fafc); border: 1px solid var(--line); border-radius: 6px; font-size: 11px; line-height: 1.5; margin: 4px 0 0; max-height: 220px; overflow: auto; padding: 8px 10px; white-space: pre; }
+.doctypeImageWrap { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; }
+.doctypeImage { border: 1px solid var(--line); border-radius: 6px; max-height: 64px; max-width: 120px; }
+@media (max-width: 767px) { .doctypeRow { grid-template-columns: 1fr; } }

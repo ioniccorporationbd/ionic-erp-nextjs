@@ -11,6 +11,8 @@ export interface TutorialSpaceSettings {
   readonly github_url?: string;
   readonly source_base_url?: string;
   readonly attribution_text?: string;
+  readonly theme_config_json?: string;
+  readonly sort_order?: number;
 }
 
 export interface TutorialNavigationArticle {
@@ -37,6 +39,7 @@ export interface TutorialArticle {
   readonly seo_title?: string;
   readonly seo_description?: string;
   readonly source_url?: string;
+  readonly source_hash?: string;
   readonly source_updated_at?: string;
   readonly sort_order: number;
 }
