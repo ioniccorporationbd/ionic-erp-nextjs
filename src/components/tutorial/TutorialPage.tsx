@@ -63,13 +63,6 @@ function slugifyHeading(text: string): string {
   return text.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "section";
 }
 
-function displayDate(value: string | undefined): string {
-  if (!value) return "Not available";
-  const date = new Date(value.replace(" ", "T"));
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("en", { year: "numeric", month: "short", day: "numeric" }).format(date);
-}
-
 function allSearchRows(navigation: readonly TutorialNavigationCategory[]): SearchRow[] {
   return navigation.flatMap((category) => category.articles.map((article) => ({ ...article, category: category.title })));
 }
@@ -309,7 +302,6 @@ export function TutorialArticle({ payload, space, defaultSpace }: Readonly<{ pay
       <div className={styles.rule} />
       <MarkdownArticle markdown={article.body_markdown} space={space} defaultSpace={defaultSpace} />
       <TutorialPager previous={payload.previous_article} next={payload.next_article} space={space} defaultSpace={defaultSpace} />
-      <p className={styles.updated}>Last updated {displayDate(article.source_updated_at || payload.last_modified)}</p>
       <TutorialFeedback />
     </article>
   );
