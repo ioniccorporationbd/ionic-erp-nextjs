@@ -79,7 +79,6 @@ export function DocTypeFields({ payload }: { payload: TutorialPagePayload }) {
       <details className={styles.doctypeDetails}>
         <summary id="doctype-fields-heading" className={styles.doctypeSummary}>
           DocType Fields
-          <span className={styles.doctypeBadge}>৩টি ডকটাইপ · ফিল্ড + data</span>
         </summary>
         <p className={styles.doctypeIntro}>
           এই পেজে ব্যবহৃত ৩টি DocType-এর ফিল্ড ও তার বর্তমান data নিচে দেখানো হলো।

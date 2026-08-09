@@ -202,7 +202,6 @@
 .doctypeSummary::-webkit-details-marker { display: none; }
 .doctypeSummary::before { content: "▸"; color: var(--muted); font-size: 13px; transition: transform .15s ease; }
 .doctypeDetails[open] .doctypeSummary::before { transform: rotate(90deg); }
-.doctypeBadge { background: var(--panel-2, #f1f5f9); border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 11px; font-weight: 500; padding: 2px 10px; }
 .doctypeIntro { border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; line-height: 1.6; margin: 0; padding: 12px 18px; }
 .doctypeGroup { border-top: 1px solid var(--line); padding: 14px 18px 18px; }
 .doctypeGroupTitle { align-items: baseline; display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 15px; margin: 0 0 12px; }
