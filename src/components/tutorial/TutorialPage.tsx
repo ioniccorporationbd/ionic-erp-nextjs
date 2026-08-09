@@ -249,11 +249,12 @@ function MarkdownArticle({ markdown, space, defaultSpace }: Readonly<{ markdown:
       const heading = /^(#{1,4})\s+(.+)$/.exec(line);
       if (heading) {
         flushList();
-        const level = Math.min(4, Math.max(2, heading[1].length));
+        const level = Math.min(4, Math.max(1, heading[1].length));
         const title = heading[2].replace(/#+$/, "").trim();
         const id = slugifyHeading(title);
         const copy = <button className={styles.headingLink} type="button" aria-label={`Copy link to ${title}`} onClick={() => void copyHeadingLink(id)}>#</button>;
-        if (level === 2) result.push(<h2 id={id} key={id}>{copy}{title}</h2>);
+        if (level === 1) result.push(<h1 id={id} key={id}>{copy}{title}</h1>);
+        else if (level === 2) result.push(<h2 id={id} key={id}>{copy}{title}</h2>);
         else if (level === 3) result.push(<h3 id={id} key={id}>{copy}{title}</h3>);
         else result.push(<h4 id={id} key={id}>{copy}{title}</h4>);
         continue;
@@ -301,14 +302,11 @@ function editHref(article: TutorialArticle, space: TutorialSpaceSettings): strin
 
 export function TutorialArticle({ payload, space, defaultSpace }: Readonly<{ payload: TutorialPagePayload; space: string; defaultSpace: string }>) {
   const { article } = payload;
-  const coverImage = publicAssetPath(article.cover_image, "");
   const editUrl = editHref(article, payload.space);
   return (
-    <article className={styles.article} aria-labelledby="page-title">
-      <div className={styles.articleToolbar}><h1 id="page-title">{article.title}</h1>{editUrl ? <a className={styles.editLink} href={editUrl} target="_blank" rel="noopener noreferrer"><FiEdit3 aria-hidden />Edit</a> : null}</div>
+    <article className={styles.article}>
+      {editUrl ? <div className={styles.articleToolbar}><a className={styles.editLink} href={editUrl} target="_blank" rel="noopener noreferrer"><FiEdit3 aria-hidden />Edit</a></div> : null}
       <div className={styles.rule} />
-      {article.summary ? <p>{article.summary}</p> : null}
-      {coverImage ? <img className={styles.heroImage} src={coverImage} alt={article.title} /> : null}
       <MarkdownArticle markdown={article.body_markdown} space={space} defaultSpace={defaultSpace} />
       <TutorialPager previous={payload.previous_article} next={payload.next_article} space={space} defaultSpace={defaultSpace} />
       <p className={styles.updated}>Last updated {displayDate(article.source_updated_at || payload.last_modified)}</p>

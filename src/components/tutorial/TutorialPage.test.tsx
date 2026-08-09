@@ -36,7 +36,7 @@ const payload: TutorialPagePayload = {
     title: "Welcome",
     slug: "welcome",
     summary: "Start here",
-    body_markdown: "## Install\n\nLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLong\n\n```bash\nbench --site next.ionicerp.xyz migrate\n```\n\n| Key | Value |\n| --- | --- |\n| Space | ionic-tutorial |\n\n> Note for admins\n\n[External](https://example.com) and [bad](javascript:alert(1)).",
+    body_markdown: "# Welcome\n\n## Install\n\nLongLongLongLongLongLongLongLongLongLongLongLongLongLongLongLong\n\n```bash\nbench --site next.ionicerp.xyz migrate\n```\n\n| Key | Value |\n| --- | --- |\n| Space | ionic-tutorial |\n\n> Note for admins\n\n[External](https://example.com) and [bad](javascript:alert(1)).",
     source_updated_at: "2026-08-02 18:37:15.196692",
     sort_order: 1,
   },
