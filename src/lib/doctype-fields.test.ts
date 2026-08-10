@@ -110,7 +110,7 @@ describe("buildDocTypeRows", () => {
     expect(byName.content_blocks.value).toBe("4 blocks");
     expect(byName.seo_title.value).toBe("Welcome to Ionic Tutorial");
     expect(byName.source_url.kind).toBe("text"); // content:// is not a clickable href
-    expect(byName.source_updated_at.value).toBe("2026-08-02 00:00:00");
+    expect(byName.source_updated_at.value).toBe("2026-08-10 00:00:00");
     expect(byName.sort_order.value).toBe("1");
     expect(byName.source_hash.present).toBe(false);
     expect(byName.published.present).toBe(false);
@@ -162,7 +162,7 @@ describe("buildDocTypeRows", () => {
     expect(fieldnames).not.toContain("cover_image");
     expect(fieldnames).not.toContain("body_sections");
     // new block-era fields resolve from the payload
-    expect(rows.find((row) => row.fieldname === "content_blocks")?.value).toBe("11 blocks");
+    expect(rows.find((row) => row.fieldname === "content_blocks")?.value).toBe("14 blocks");
     expect(rows.find((row) => row.fieldname === "title")?.value).toBe("Long Article With Code Blocks Tables Alerts Large Images And Very Very Long Titles");
     expect(rows.find((row) => row.fieldname === "slug")?.value).toBe("long-article");
   });

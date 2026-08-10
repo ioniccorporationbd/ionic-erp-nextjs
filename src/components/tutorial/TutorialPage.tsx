@@ -35,7 +35,11 @@ function publicAssetPath(value: string | undefined, fallback: string): string {
 }
 
 function allSearchRows(navigation: readonly TutorialNavigationCategory[]): SearchRow[] {
-  return navigation.flatMap((category) => category.articles.map((article) => ({ ...article, category: category.title })));
+  return navigation.flatMap((category) =>
+    (category.subcategories ?? []).flatMap((sub) =>
+      sub.articles.map((article) => ({ ...article, category: `${category.title} › ${sub.title}` })),
+    ),
+  );
 }
 
 export function TutorialSpaceDropdown({ current, spaces, defaultSpace }: Readonly<{ current: TutorialSpaceSettings; spaces: TutorialSpaceSettings[] | null; defaultSpace: string }>) {
@@ -105,7 +109,8 @@ export function TutorialHeader({ payload, spaces, defaultSpace, onOpenSearch }: 
 }
 
 export function TutorialCategory({ group, activeSlug, defaultOpen, space, defaultSpace, onNavigate }: Readonly<{ group: TutorialNavigationCategory; activeSlug: string; defaultOpen: boolean; space: string; defaultSpace: string; onNavigate?: () => void }>) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const hasActive = (group.subcategories ?? []).some((sub) => sub.articles.some((a) => a.slug === activeSlug));
+  const [isOpen, setIsOpen] = useState(defaultOpen || hasActive);
   return (
     <div className={styles.navGroup}>
       <button type="button" className={styles.navGroupButton} aria-expanded={isOpen} onClick={() => setIsOpen((open) => !open)}>
@@ -113,10 +118,12 @@ export function TutorialCategory({ group, activeSlug, defaultOpen, space, defaul
       </button>
       {isOpen ? (
         <div className={styles.navLinks}>
-          {group.articles.map((article) => {
-            const isActive = article.slug === activeSlug;
-            return <Link className={isActive ? styles.activeNavLink : styles.navLink} href={hrefForSlug(article.slug, space, defaultSpace)} key={article.slug} onClick={onNavigate} aria-current={isActive ? "page" : undefined} prefetch={TUTORIAL_LINK_PREFETCH}>{article.title}</Link>;
-          })}
+          {(group.subcategories ?? []).map((sub) =>
+            sub.articles.map((article) => {
+              const isActive = article.slug === activeSlug;
+              return <Link className={isActive ? styles.activeNavLink : styles.navLink} href={hrefForSlug(article.slug, space, defaultSpace)} key={article.slug} onClick={onNavigate} aria-current={isActive ? "page" : undefined} prefetch={TUTORIAL_LINK_PREFETCH}>{article.title}</Link>;
+            }),
+          )}
         </div>
       ) : null}
     </div>
@@ -124,10 +131,10 @@ export function TutorialCategory({ group, activeSlug, defaultOpen, space, defaul
 }
 
 export function TutorialSidebar({ navigation, activeSlug, space, defaultSpace, onNavigate }: Readonly<{ navigation: readonly TutorialNavigationCategory[]; activeSlug: string; space: string; defaultSpace: string; onNavigate?: () => void }>) {
-  const visibleGroups = navigation.filter((group) => group.articles.length > 0);
+  const visibleGroups = navigation.filter((group) => (group.subcategories ?? []).some((sub) => sub.articles.length > 0));
   return (
     <nav className={styles.navigation} aria-label="Documentation navigation">
-      {visibleGroups.map((group) => <TutorialCategory key={group.slug} group={group} activeSlug={activeSlug} defaultOpen={group.articles.some((article) => article.slug === activeSlug)} space={space} defaultSpace={defaultSpace} onNavigate={onNavigate} />)}
+      {visibleGroups.map((group) => <TutorialCategory key={group.slug} group={group} activeSlug={activeSlug} defaultOpen={(group.subcategories ?? []).some((sub) => sub.articles.some((a) => a.slug === activeSlug))} space={space} defaultSpace={defaultSpace} onNavigate={onNavigate} />)}
     </nav>
   );
 }

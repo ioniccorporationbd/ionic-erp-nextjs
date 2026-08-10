@@ -26,9 +26,16 @@ const payload: TutorialPagePayload = {
       title: "Getting Started With A Very Long Category Name That Must Wrap",
       slug: "getting-started",
       sort_order: 1,
-      articles: [
-        { title: "Welcome", slug: "welcome", summary: "Start", sort_order: 1 },
-        { title: "Runtime Article", slug: "runtime-article", summary: "New", sort_order: 2 },
+      subcategories: [
+        {
+          title: "Basics",
+          slug: "basics",
+          sort_order: 1,
+          articles: [
+            { title: "Welcome", slug: "welcome", summary: "Start", sort_order: 1 },
+            { title: "Runtime Article", slug: "runtime-article", summary: "New", sort_order: 2 },
+          ],
+        },
       ],
     },
   ],
@@ -234,7 +241,7 @@ describe("TutorialPage Frappe-style shell", () => {
   });
 
   it("hides sidebar categories that have no published articles", () => {
-    const emptyGroup = { title: "Empty Category", slug: "empty", sort_order: 9, articles: [] };
+    const emptyGroup = { title: "Empty Category", slug: "empty", sort_order: 9, subcategories: [] };
     const withEmpty = { ...payload, navigation: [...payload.navigation, emptyGroup] };
     render(<TutorialPage payload={withEmpty} />);
     expect(screen.queryByRole("button", { name: /Empty Category/ })).not.toBeInTheDocument();
@@ -243,7 +250,7 @@ describe("TutorialPage Frappe-style shell", () => {
   it("shows an empty state and paginates search results", async () => {
     const user = userEvent.setup();
     const manyArticles = Array.from({ length: 10 }, (_, index) => ({ title: `Article ${index + 1}`, slug: `article-${index + 1}`, summary: "Match me", sort_order: index + 1 }));
-    const manyPayload = { ...payload, navigation: [{ title: "Many", slug: "many", sort_order: 1, articles: manyArticles }] };
+    const manyPayload = { ...payload, navigation: [{ title: "Many", slug: "many", sort_order: 1, subcategories: [{ title: "All", slug: "all", sort_order: 1, articles: manyArticles }] }] };
     render(<TutorialPage payload={manyPayload} />);
     await user.click(screen.getByRole("button", { name: "Open search" }));
     const dialog = screen.getByRole("dialog", { name: "Search documentation" });

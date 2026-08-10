@@ -19,18 +19,36 @@ export interface TutorialNavigationArticle {
   readonly title: string;
   readonly slug: string;
   readonly summary?: string;
+  readonly subcategory?: string;
   readonly sort_order: number;
+}
+
+export interface TutorialNavigationSubcategory {
+  readonly title: string;
+  readonly slug: string;
+  readonly subtitle?: string;
+  readonly short_description?: string;
+  readonly sort_order: number;
+  readonly category?: string;
+  readonly articles: readonly TutorialNavigationArticle[];
 }
 
 export interface TutorialNavigationCategory {
   readonly title: string;
   readonly slug: string;
+  readonly subtitle?: string;
   readonly description?: string;
+  readonly icon?: string;
+  readonly image?: string;
   readonly sort_order: number;
-  readonly articles: readonly TutorialNavigationArticle[];
+  readonly subcategories: readonly TutorialNavigationSubcategory[];
 }
 
-export type TutorialBlockType = "Heading" | "Markdown" | "Image" | "Video" | "Image Text" | "Callout" | "Divider";
+export type TutorialBlockType =
+  | "Heading" | "Markdown" | "Image" | "Video" | "Image Text"
+  | "Callout" | "Steps" | "Checklist" | "Quote" | "Code" | "Link" | "Divider";
+
+export type TutorialCalloutType = "Info" | "Tip" | "Note" | "Warning" | "Success" | "Important";
 
 export interface TutorialContentBlock {
   readonly block_type: TutorialBlockType;
@@ -38,14 +56,24 @@ export interface TutorialContentBlock {
   readonly subtitle?: string;
   readonly description?: string;
   readonly content?: string;
+  readonly additional_content?: string;
   readonly image?: string;
   readonly image_alt?: string;
   readonly caption?: string;
   readonly video_url?: string;
   readonly attachment?: string;
-  readonly layout?: "image-left" | "image-right" | "image-above";
-  readonly width?: "full" | "wide" | "normal";
+  readonly layout?:
+    | "image-left" | "image-right" | "image-above" | "image-top"
+    | "default" | "text-only" | "full-width" | "two-column";
+  readonly width?: "full" | "wide" | "normal" | "small";
   readonly alignment?: "left" | "center" | "right";
+  readonly callout_type?: TutorialCalloutType;
+  readonly button_text?: string;
+  readonly button_url?: string;
+  readonly open_in_new_tab?: boolean | number;
+  readonly icon?: string;
+  readonly background_style?: "default" | "muted" | "highlighted" | "card" | "bordered";
+  readonly anchor_id?: string;
   readonly config_json?: string;
   readonly enabled?: boolean | number;
 }
@@ -53,7 +81,14 @@ export interface TutorialContentBlock {
 export interface TutorialArticle {
   readonly title: string;
   readonly slug: string;
+  readonly subtitle?: string;
   readonly summary?: string;
+  readonly description?: string;
+  readonly subcategory?: string;
+  readonly category?: string;
+  readonly featured_image?: string;
+  readonly icon?: string;
+  readonly featured?: boolean | number;
   readonly content_blocks: readonly TutorialContentBlock[];
   readonly seo_title?: string;
   readonly seo_description?: string;
@@ -106,12 +141,13 @@ export type TutorialPagePayload = {
   readonly next_article: TutorialAdjacentArticle | null;
   readonly breadcrumbs: readonly TutorialBreadcrumb[];
   readonly last_modified: string;
-}
+};
 
 export interface TutorialSearchResult {
   readonly title: string;
   readonly slug: string;
   readonly category: string;
+  readonly subcategory?: string;
   readonly excerpt: string;
   readonly matched_heading?: string;
 }

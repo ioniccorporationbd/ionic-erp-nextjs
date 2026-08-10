@@ -233,7 +233,7 @@ function buildRows(
 export function findArticleCategory(payload: TutorialPagePayload): TutorialNavigationCategory | null {
   const slug = payload.article.slug;
   for (const category of payload.navigation) {
-    if (category.articles.some((article) => article.slug === slug)) return category;
+    if ((category.subcategories ?? []).some((sub) => sub.articles.some((article) => article.slug === slug))) return category;
   }
   return null;
 }

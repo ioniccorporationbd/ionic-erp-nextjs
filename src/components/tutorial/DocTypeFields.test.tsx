@@ -25,7 +25,7 @@ describe("DocTypeFields", () => {
     expect(within(articleGroup).getByText("content_blocks")).toBeInTheDocument();
     expect(within(articleGroup).getByText("4 blocks")).toBeInTheDocument();
     expect(within(articleGroup).getByText("getting-started")).toBeInTheDocument();
-    expect(within(articleGroup).getByText("2026-08-02 00:00:00")).toBeInTheDocument();
+    expect(within(articleGroup).getByText("2026-08-10 00:00:00")).toBeInTheDocument();
   });
 
   it("links http(s) URL fields safely and keeps content:// values as plain text", () => {

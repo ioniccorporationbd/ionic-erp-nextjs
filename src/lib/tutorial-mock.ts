@@ -24,7 +24,7 @@ export const mockTutorialSpaces: TutorialSpacesPayload = {
       short_description: "Point of sale mock space.",
     },
   ],
-  last_modified: "2026-08-02 00:00:00",
+  last_modified: "2026-08-10 00:00:00",
 };
 
 export const mockTutorialSpace: TutorialSpacePayload = {
@@ -45,11 +45,19 @@ export const mockTutorialSpace: TutorialSpacePayload = {
     {
       title: "Getting Started",
       slug: "getting-started",
+      subtitle: "First steps",
       description: "Start here.",
       sort_order: 1,
-      articles: [
-        { title: "Welcome", slug: "welcome", summary: "Development mock welcome article.", sort_order: 1 },
-        { title: "Runtime Article", slug: "runtime-article", summary: "A mock runtime-only article.", sort_order: 2 },
+      subcategories: [
+        {
+          title: "Employee Setup",
+          slug: "emp-setup",
+          sort_order: 1,
+          articles: [
+            { title: "Welcome", slug: "welcome", summary: "Development mock welcome article.", sort_order: 1, subcategory: "emp-setup" },
+            { title: "Runtime Article", slug: "runtime-article", summary: "A mock runtime-only article.", sort_order: 2, subcategory: "emp-setup" },
+          ],
+        },
       ],
     },
     {
@@ -57,14 +65,21 @@ export const mockTutorialSpace: TutorialSpacePayload = {
       slug: "long-navigation",
       description: "Stress cases.",
       sort_order: 2,
-      articles: [
-        { title: "Long Article With Code Blocks Tables Alerts Large Images And Very Very Long Titles", slug: "long-article", summary: "Stress article for responsive QA.", sort_order: 1 },
-        { title: "New Article Added After Frontend Build", slug: "post-build-article", summary: "Runtime slug coverage.", sort_order: 2 },
+      subcategories: [
+        {
+          title: "Long Content",
+          slug: "long-content",
+          sort_order: 1,
+          articles: [
+            { title: "Long Article With Code Blocks Tables Alerts Large Images And Very Very Long Titles", slug: "long-article", summary: "Stress article for responsive QA.", sort_order: 1, subcategory: "long-content" },
+            { title: "New Article Added After Frontend Build", slug: "post-build-article", summary: "Runtime slug coverage.", sort_order: 2, subcategory: "long-content" },
+          ],
+        },
       ],
     },
   ],
   default_article_slug: "welcome",
-  last_modified: "2026-08-02 00:00:00",
+  last_modified: "2026-08-10 00:00:00",
 };
 
 const basePage: TutorialPagePayload = {
@@ -72,7 +87,10 @@ const basePage: TutorialPagePayload = {
   article: {
     title: "Welcome",
     slug: "welcome",
+    subtitle: "Development mock",
     summary: "Development mock welcome article.",
+    subcategory: "emp-setup",
+    category: "getting-started",
     content_blocks: [
       {
         block_type: "Heading",
@@ -94,7 +112,7 @@ const basePage: TutorialPagePayload = {
     seo_title: "Welcome to Ionic Tutorial",
     seo_description: "Development mock tutorial page.",
     source_url: "content://ionic-tutorial/articles/welcome.md",
-    source_updated_at: "2026-08-02 00:00:00",
+    source_updated_at: "2026-08-10 00:00:00",
     sort_order: 1,
   },
   table_of_contents: [
@@ -104,7 +122,7 @@ const basePage: TutorialPagePayload = {
   previous_article: null,
   next_article: { title: "Runtime Article", slug: "runtime-article" },
   breadcrumbs: [{ title: "Ionic Tutorial", slug: "ionic-tutorial" }, { title: "Welcome", slug: "welcome" }],
-  last_modified: "2026-08-02 00:00:00",
+  last_modified: "2026-08-10 00:00:00",
 };
 
 export const mockTutorialPages: Record<string, TutorialPagePayload> = {
@@ -137,6 +155,8 @@ export const mockTutorialPages: Record<string, TutorialPagePayload> = {
       ...basePage.article,
       title: "Long Article With Code Blocks Tables Alerts Large Images And Very Very Long Titles",
       slug: "long-article",
+      subcategory: "long-content",
+      category: "long-navigation",
       summary: "A deterministic article for long content, long navigation, and responsive visual coverage.",
       content_blocks: [
         {
@@ -168,8 +188,15 @@ export const mockTutorialPages: Record<string, TutorialPagePayload> = {
         {
           block_type: "Callout",
           title: "Heads up",
+          callout_type: "Warning",
           description: "Markdown formatting works inside callouts.",
           content: "Callout blocks render **markdown** with a distinct background.",
+        },
+        {
+          block_type: "Callout",
+          title: "Tip",
+          callout_type: "Tip",
+          content: "Use **callout_type** to change the visual style.",
         },
         {
           block_type: "Divider",
@@ -196,8 +223,19 @@ export const mockTutorialPages: Record<string, TutorialPagePayload> = {
           content: "An image text block pairs media with prose and wraps on small screens.",
           layout: "image-right",
         },
+        {
+          block_type: "Steps",
+          title: "Setup Steps",
+          subtitle: "Follow in order",
+          content: "1. Install dependencies\n2. Configure environment\n3. Run migrate\n4. Start server",
+        },
+        {
+          block_type: "Checklist",
+          title: "Pre-flight Checklist",
+          content: "- [x] Node.js installed\n- [x] Python 3 installed\n- [ ] Redis running\n- [ ] MariaDB configured",
+        },
       ],
-      source_updated_at: "2026-08-02 18:37:15.196692",
+      source_updated_at: "2026-08-10 00:00:00",
       sort_order: 3,
     },
     table_of_contents: [
@@ -215,6 +253,8 @@ export const mockTutorialPages: Record<string, TutorialPagePayload> = {
       ...basePage.article,
       title: "New Article Added After Frontend Build",
       slug: "post-build-article",
+      subcategory: "long-content",
+      category: "long-navigation",
       content_blocks: [
         {
           block_type: "Heading",
