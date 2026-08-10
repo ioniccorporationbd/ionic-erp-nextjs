@@ -118,12 +118,15 @@ export function TutorialCategory({ group, activeSlug, defaultOpen, space, defaul
       </button>
       {isOpen ? (
         <div className={styles.navLinks}>
-          {(group.subcategories ?? []).map((sub) =>
-            sub.articles.map((article) => {
-              const isActive = article.slug === activeSlug;
-              return <Link className={isActive ? styles.activeNavLink : styles.navLink} href={hrefForSlug(article.slug, space, defaultSpace)} key={article.slug} onClick={onNavigate} aria-current={isActive ? "page" : undefined} prefetch={TUTORIAL_LINK_PREFETCH}>{article.title}</Link>;
-            }),
-          )}
+          {(group.subcategories ?? []).map((sub) => (
+            <div key={sub.slug} className={styles.navSubgroup}>
+              <span className={styles.navSubgroupTitle}>{sub.title}</span>
+              {sub.articles.map((article) => {
+                const isActive = article.slug === activeSlug;
+                return <Link className={isActive ? styles.activeNavLink : styles.navLink} href={hrefForSlug(article.slug, space, defaultSpace)} key={article.slug} onClick={onNavigate} aria-current={isActive ? "page" : undefined} prefetch={TUTORIAL_LINK_PREFETCH}>{article.title}</Link>;
+              })}
+            </div>
+          ))}
         </div>
       ) : null}
     </div>
