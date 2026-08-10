@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useMemo, type ReactNode } from "react";
+import { Fragment, useCallback, useMemo, useState, type ReactNode } from "react";
+import { FiCheck, FiCopy } from "react-icons/fi";
 import type { TutorialContentBlock } from "@/types/tutorial";
 import styles from "./tutorial.module.css";
 
@@ -79,7 +80,8 @@ export function MarkdownText({ markdown, space, defaultSpace }: Readonly<{ markd
     let listItems: string[] = [];
     let orderedItems: string[] = [];
     let codeLines: string[] = [];
-    let inCode = false;
+    let codeLang: string | null = null;
+    let inCode = false;  // track whether shorthanded code on/off lines for language badge
 
     function flushList() {
       if (listItems.length) result.push(<ul key={`ul-${result.length}`}>{listItems.map((item, index) => <li key={`${item}-${index}`}>{renderInline(item, space, defaultSpace)}</li>)}</ul>);
@@ -89,8 +91,9 @@ export function MarkdownText({ markdown, space, defaultSpace }: Readonly<{ markd
     }
     function flushCode() {
       if (!codeLines.length) return;
-      result.push(<pre key={`pre-${result.length}`}><code>{codeLines.join("\n")}</code></pre>);
+      result.push(<CodeBlock key={`pre-${result.length}`} code={codeLines.join("\n")} language={codeLang} />);
       codeLines = [];
+      codeLang = null;
     }
     function tryTable(index: number): number {
       const header = lines[index]?.trim();
@@ -111,7 +114,7 @@ export function MarkdownText({ markdown, space, defaultSpace }: Readonly<{ markd
       const rawLine = lines[index];
       const line = rawLine.trim();
       if (line.startsWith("```")) {
-        if (inCode) { inCode = false; flushCode(); } else { flushList(); inCode = true; }
+        if (inCode) { inCode = false; flushCode(); } else { flushList(); inCode = true; codeLang = line.slice(3).trim() || null; }
         continue;
       }
       if (inCode) { codeLines.push(rawLine); continue; }
@@ -146,6 +149,25 @@ export function MarkdownText({ markdown, space, defaultSpace }: Readonly<{ markd
   }, [markdown, space, defaultSpace]);
 
   return <>{blocks}</>;
+}
+
+/** Code block with language badge and copy button. */
+function CodeBlock({ code, language }: Readonly<{ code: string; language: string | null }>) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = useCallback(() => {
+    navigator.clipboard?.writeText(code).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }).catch(() => undefined);
+  }, [code]);
+  return (
+    <div className={styles.codeWrapper}>
+      <div className={styles.codeHeader}>
+        {language ? <span className={styles.codeLang}>{language}</span> : <span />}
+        <button className={styles.codeCopy} type="button" onClick={handleCopy} aria-label={copied ? "Copied" : "Copy code"}>
+          {copied ? <FiCheck /> : <FiCopy />}
+        </button>
+      </div>
+      <pre className={styles.codePre}><code>{code}</code></pre>
+    </div>
+  );
 }
 
 /** Extract the YouTube video id from watch / embed / shorts / youtu.be URLs. */

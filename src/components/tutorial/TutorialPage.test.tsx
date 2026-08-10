@@ -73,10 +73,11 @@ describe("TutorialPage Frappe-style shell", () => {
 
     expect(screen.getByRole("banner")).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Documentation navigation" })).toBeInTheDocument();
+    const nav = screen.getByRole("navigation", { name: "Documentation navigation" });
     expect(screen.getByRole("complementary", { name: "On this page" })).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
-    expect(screen.getByRole("link", { name: "Welcome" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "Welcome" })).toHaveAttribute("data-prefetch", "false");
+    expect(within(nav).getByRole("link", { name: "Welcome" })).toHaveAttribute("aria-current", "page");
+    expect(within(nav).getByRole("link", { name: "Welcome" })).toHaveAttribute("data-prefetch", "false");
     expect(screen.getByRole("link", { name: /Next Runtime Article/ })).toHaveAttribute("href", "/tutorial/runtime-article");
     expect(screen.getByRole("link", { name: /Next Runtime Article/ })).toHaveAttribute("data-prefetch", "false");
 
@@ -169,7 +170,7 @@ describe("TutorialPage Frappe-style shell", () => {
     expect(screen.getByText("Install the app and log in.")).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 3, name: "Side by side" })).toBeInTheDocument();
     expect(screen.getByText("Callout note.")).toBeInTheDocument();
-    expect(screen.getByRole("separator")).toBeInTheDocument();
+    expect(screen.getAllByRole("separator").length).toBeGreaterThan(0);
 
     // The markdown body of the base fixture is NOT rendered for block articles
     expect(screen.queryByText("bench --site next.ionicerp.xyz migrate")).not.toBeInTheDocument();
@@ -233,7 +234,8 @@ describe("TutorialPage Frappe-style shell", () => {
     const posPayload = { ...payload, space: { ...payload.space, slug: "ionic-pos", title: "Ionic POS" } };
     render(<TutorialPage payload={posPayload} spaces={null} defaultSpace="ionic-tutorial" />);
 
-    expect(screen.getByRole("link", { name: "Welcome" })).toHaveAttribute("href", "/tutorial/welcome?space=ionic-pos");
+    const posNav = screen.getByRole("navigation", { name: "Documentation navigation" });
+    expect(within(posNav).getByRole("link", { name: "Welcome" })).toHaveAttribute("href", "/tutorial/welcome?space=ionic-pos");
     expect(screen.getByRole("link", { name: /Next Runtime Article/ })).toHaveAttribute("href", "/tutorial/runtime-article?space=ionic-pos");
     await user.click(screen.getByRole("button", { name: "Open search" }));
     const dialog = screen.getByRole("dialog", { name: "Search documentation" });

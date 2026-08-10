@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { FiCheck, FiChevronDown, FiChevronRight, FiEdit3, FiMenu, FiSidebar, FiSearch, FiX } from "react-icons/fi";
 
 import { TutorialBlockRenderer, hideOnError, safeHref, slugifyHeading } from "./tutorial-blocks";
@@ -168,15 +168,38 @@ function editHref(article: TutorialArticle, space: TutorialSpaceSettings): strin
 }
 
 export function TutorialArticle({ payload, space, defaultSpace }: Readonly<{ payload: TutorialPagePayload; space: string; defaultSpace: string }>) {
-  const { article } = payload;
+  const { article, breadcrumbs, last_modified } = payload;
   const editUrl = editHref(article, payload.space);
   const blocks = article.content_blocks;
   const hasBlocks = Array.isArray(blocks) && blocks.length > 0;
+  const wordCount = hasBlocks
+    ? blocks.reduce((n: number, b: { content?: string; body_markdown?: string }) => {
+        const text = (b.content ?? "") + (b.body_markdown ?? "");
+        return n + (text.match(/\\S+/g)?.length || 0);
+      }, 0)
+    : 0;
+  const readingTime = Math.max(1, Math.ceil(wordCount / 200));
   return (
     <article className={styles.article}>
       {editUrl ? <div className={styles.articleToolbar}><a className={styles.editLink} href={editUrl} target="_blank" rel="noopener noreferrer"><FiEdit3 aria-hidden />Edit</a></div> : null}
       <div className={styles.rule} />
+      {breadcrumbs.length > 0 ? (
+        <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+          {breadcrumbs.map((crumb, i) => (
+            <Fragment key={crumb.title}>
+              {i > 0 ? <span className={styles.breadcrumbSep}>/</span> : null}
+              {crumb.slug ? <Link href={hrefForSlug(crumb.slug, space, defaultSpace)} prefetch={TUTORIAL_LINK_PREFETCH}>{crumb.title}</Link> : <span>{crumb.title}</span>}
+            </Fragment>
+          ))}
+        </nav>
+      ) : null}
       <h1 id={slugifyHeading(article.title)}>{article.title}</h1>
+      {article.subtitle ? <p className={styles.articleSubtitle}>{article.subtitle}</p> : null}
+      <div className={styles.articleMeta}>
+        <span>{readingTime} min read</span>
+        {last_modified ? <span>Updated {last_modified}</span> : null}
+      </div>
+      <hr className={styles.contentRule} />
       {hasBlocks ? <TutorialBlockRenderer blocks={blocks} space={space} defaultSpace={defaultSpace} /> : null}
       <TutorialPager previous={payload.previous_article} next={payload.next_article} space={space} defaultSpace={defaultSpace} />
       <TutorialFeedback />
