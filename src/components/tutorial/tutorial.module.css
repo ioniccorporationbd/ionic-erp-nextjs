@@ -234,12 +234,31 @@
 .feedback button { background: var(--panel); border: 1px solid var(--line); color: var(--ink); height: 32px; min-width: 44px; padding: 0 10px; }
 .feedback button + button { border-left: 0; }
 
-.onThisPage { padding: 24px 24px 24px 0; }
-.stickyContents { border-left: 1px solid var(--line); display: flex; flex-direction: column; gap: 15px; padding-left: 16px; position: sticky; top: 81px; }
-.stickyContents strong { color: var(--ink); font-size: 14px; }
-.stickyContents a { border-radius: 4px; color: var(--ink); font-size: 14px; line-height: 1.25; overflow-wrap: anywhere; text-decoration: none; }
-.stickyContents a:hover, .activeTocLink { color: var(--link) !important; }
-.nestedContentLink { padding-left: 12px; }
+.onThisPage { padding: 28px 20px 24px 0; }
+.stickyContents { display: flex; flex-direction: column; gap: 4px; position: sticky; top: 81px; }
+.stickyContents strong { color: #9ca3af; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; margin-bottom: 4px; padding: 0 12px; text-transform: uppercase; }
+.tocLink, .activeTocLink {
+  border-radius: 10px;
+  color: #6b7280;
+  display: block;
+  font-size: 13px;
+  letter-spacing: -0.1px;
+  line-height: 1.3;
+  min-height: 32px;
+  overflow: hidden;
+  padding: 7px 12px;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  transition: background .12s ease, color .12s ease;
+  white-space: nowrap;
+}
+.tocLink:hover { background: #f3f4f6; color: #111827; }
+.activeTocLink {
+  background: #e5e7eb;
+  color: #111827;
+  font-weight: 600;
+}
+.nestedContentLink { padding-left: 24px; }
 
 .searchOverlay, .mobileDrawer { inset: 0; position: fixed; z-index: 90; }
 .searchBackdrop, .drawerBackdrop { background: rgb(0 0 0 / .36); border: 0; inset: 0; position: absolute; width: 100%; }

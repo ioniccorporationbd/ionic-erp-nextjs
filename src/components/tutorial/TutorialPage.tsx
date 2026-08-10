@@ -185,7 +185,7 @@ export function TutorialArticle({ payload, space, defaultSpace }: Readonly<{ pay
 }
 
 export function TutorialTableOfContents({ toc, activeId }: Readonly<{ toc: readonly TutorialTocItem[]; activeId?: string }>) {
-  return <aside className={styles.onThisPage} aria-label="On this page"><div className={styles.stickyContents}><strong>On this page</strong>{toc.map((section) => <a className={`${section.level > 2 ? styles.nestedContentLink : ""} ${activeId === section.id ? styles.activeTocLink : ""}`.trim()} href={`#${section.id}`} key={section.id}>{section.title}</a>)}</div></aside>;
+  return <aside className={styles.onThisPage} aria-label="On this page"><div className={styles.stickyContents}><strong>On this page</strong>{toc.map((section) => <a className={`${section.level > 2 ? styles.nestedContentLink : ""} ${activeId === section.id ? styles.activeTocLink : styles.tocLink}`.trim()} href={`#${section.id}`} key={section.id} title={section.title}>{section.title}</a>)}</div></aside>;
 }
 
 export function TutorialSearchDialog({ rows, open, onClose, space, defaultSpace }: Readonly<{ rows: readonly SearchRow[]; open: boolean; onClose: () => void; space: string; defaultSpace: string }>) {
