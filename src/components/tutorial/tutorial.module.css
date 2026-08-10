@@ -68,11 +68,15 @@
 }
 .sidebarCollapsed {
   overflow: hidden;
-  padding: 0 4px 24px;
+  padding: 4px 4px 24px;
   width: 40px;
 }
-.sidebarCollapsed .navigation,
-.sidebarCollapsed .sidebarHeader { display: none; }
+.sidebarCollapsed .navigation { display: none; }
+.sidebarCollapsed .sidebarHeader {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 4px;
+}
 .sidebarHeader {
   align-items: center;
   display: flex;

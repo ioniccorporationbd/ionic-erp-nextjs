@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FiCheck, FiChevronDown, FiChevronRight, FiEdit3, FiMenu, FiSidebar, FiSearch, FiX } from "react-icons/fi";
-import { DocTypeFields } from "./DocTypeFields";
+
 import { TutorialBlockRenderer, hideOnError, safeHref, slugifyHeading } from "./tutorial-blocks";
 import styles from "./tutorial.module.css";
 import type { TutorialAdjacentArticle, TutorialArticle, TutorialNavigationArticle, TutorialNavigationCategory, TutorialPagePayload, TutorialSpaceSettings, TutorialTocItem } from "@/types/tutorial";
@@ -289,7 +289,7 @@ export function TutorialShell({ payload, spaces = null, defaultSpace = DEFAULT_S
             <TutorialSidebar navigation={payload.navigation} activeSlug={payload.article.slug} space={space} defaultSpace={defaultSpace} />
           </aside>
         )}
-        <div className={styles.main}><TutorialArticle payload={payload} space={space} defaultSpace={defaultSpace} /><DocTypeFields payload={payload} /></div>
+        <div className={styles.main}><TutorialArticle payload={payload} space={space} defaultSpace={defaultSpace} /></div>
         {article.show_toc === 0 || article.show_toc === false ? null : <TutorialTableOfContents toc={payload.table_of_contents} activeId={activeId} />}
       </div>
       <TutorialSearchDialog rows={searchRows} open={searchOpen} onClose={() => setSearchOpen(false)} space={space} defaultSpace={defaultSpace} />
