@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FiCheck, FiChevronDown, FiChevronRight, FiEdit3, FiMenu, FiSearch, FiX } from "react-icons/fi";
+import { FiCheck, FiChevronDown, FiChevronRight, FiEdit3, FiMenu, FiSidebar, FiSearch, FiX } from "react-icons/fi";
 import { DocTypeFields } from "./DocTypeFields";
 import { TutorialBlockRenderer, hideOnError, safeHref, slugifyHeading } from "./tutorial-blocks";
 import styles from "./tutorial.module.css";
@@ -242,11 +242,21 @@ export function TutorialErrorState({ title = "Tutorial unavailable", message = "
 export function TutorialShell({ payload, spaces = null, defaultSpace = DEFAULT_SPACE_SLUG }: TutorialPageProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof localStorage !== "undefined") return localStorage.getItem("tutorial-sidebar-collapsed") === "1";
+    return false;
+  });
   const [activeId, setActiveId] = useState(payload.table_of_contents[0]?.id);
   const searchRows = useMemo(() => allSearchRows(payload.navigation), [payload.navigation]);
   const space = payload.space.slug;
   const article = payload.article;
 
+
+  const toggleSidebar = () => setSidebarCollapsed((prev) => {
+    const next = !prev;
+    try { localStorage.setItem("tutorial-sidebar-collapsed", next ? "1" : "0"); } catch { /* noop */ }
+    return next;
+  });
   useEffect(() => {
     const handler = (event: globalThis.KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") { event.preventDefault(); setSearchOpen(true); }
@@ -268,8 +278,17 @@ export function TutorialShell({ payload, spaces = null, defaultSpace = DEFAULT_S
   return (
     <div className={`tutorial-page ${styles.page}`} data-theme="light">
       <TutorialHeader payload={payload} spaces={spaces} defaultSpace={defaultSpace} onOpenSearch={() => setSearchOpen(true)} />
-      <div className={styles.shell}>
-        {article.show_sidebar === 0 || article.show_sidebar === false ? null : <aside className={styles.sidebar}><TutorialSidebar navigation={payload.navigation} activeSlug={payload.article.slug} space={space} defaultSpace={defaultSpace} /></aside>}
+      <div className={`${styles.shell} ${sidebarCollapsed ? styles.shellCollapsed : ""}`}>
+        {article.show_sidebar === 0 || article.show_sidebar === false ? null : (
+          <aside className={`${styles.sidebar} ${sidebarCollapsed ? styles.sidebarCollapsed : ""}`}>
+            <div className={styles.sidebarHeader}>
+              <button type="button" className={styles.sidebarToggle} onClick={toggleSidebar} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
+                <FiSidebar aria-hidden />
+              </button>
+            </div>
+            <TutorialSidebar navigation={payload.navigation} activeSlug={payload.article.slug} space={space} defaultSpace={defaultSpace} />
+          </aside>
+        )}
         <div className={styles.main}><TutorialArticle payload={payload} space={space} defaultSpace={defaultSpace} /><DocTypeFields payload={payload} /></div>
         {article.show_toc === 0 || article.show_toc === false ? null : <TutorialTableOfContents toc={payload.table_of_contents} activeId={activeId} />}
       </div>
